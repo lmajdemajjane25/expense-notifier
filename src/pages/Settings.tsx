@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,49 +43,49 @@ const Settings = () => {
   const [newProviderName, setNewProviderName] = useState('');
   const [newCurrency, setNewCurrency] = useState('');
 
-  const addPaidViaOption = () => {
+  const addPaidViaOption = useCallback(() => {
     if (newPaidVia && !paidViaOptions.includes(newPaidVia)) {
-      setPaidViaOptions([...paidViaOptions, newPaidVia]);
+      setPaidViaOptions(prev => [...prev, newPaidVia]);
       setNewPaidVia('');
     }
-  };
+  }, [newPaidVia, paidViaOptions]);
 
-  const addServiceType = () => {
+  const addServiceType = useCallback(() => {
     if (newServiceType && !serviceTypes.includes(newServiceType)) {
-      setServiceTypes([...serviceTypes, newServiceType]);
+      setServiceTypes(prev => [...prev, newServiceType]);
       setNewServiceType('');
     }
-  };
+  }, [newServiceType, serviceTypes]);
 
-  const addProviderName = () => {
+  const addProviderName = useCallback(() => {
     if (newProviderName && !providerNames.includes(newProviderName)) {
-      setProviderNames([...providerNames, newProviderName]);
+      setProviderNames(prev => [...prev, newProviderName]);
       setNewProviderName('');
     }
-  };
+  }, [newProviderName, providerNames]);
 
-  const addCurrency = () => {
+  const addCurrency = useCallback(() => {
     if (newCurrency && !currencies.includes(newCurrency)) {
-      setCurrencies([...currencies, newCurrency]);
+      setCurrencies(prev => [...prev, newCurrency]);
       setNewCurrency('');
     }
-  };
+  }, [newCurrency, currencies]);
 
-  const removePaidViaOption = (option: string) => {
-    setPaidViaOptions(paidViaOptions.filter(item => item !== option));
-  };
+  const removePaidViaOption = useCallback((option: string) => {
+    setPaidViaOptions(prev => prev.filter(item => item !== option));
+  }, []);
 
-  const removeServiceType = (type: string) => {
-    setServiceTypes(serviceTypes.filter(item => item !== type));
-  };
+  const removeServiceType = useCallback((type: string) => {
+    setServiceTypes(prev => prev.filter(item => item !== type));
+  }, []);
 
-  const removeProviderName = (provider: string) => {
-    setProviderNames(providerNames.filter(item => item !== provider));
-  };
+  const removeProviderName = useCallback((provider: string) => {
+    setProviderNames(prev => prev.filter(item => item !== provider));
+  }, []);
 
-  const removeCurrency = (currency: string) => {
-    setCurrencies(currencies.filter(item => item !== currency));
-  };
+  const removeCurrency = useCallback((currency: string) => {
+    setCurrencies(prev => prev.filter(item => item !== currency));
+  }, []);
 
   const SettingsSection = ({ 
     title, 
@@ -94,7 +94,8 @@ const Settings = () => {
     setNewValue, 
     onAdd, 
     onRemove,
-    totalCount 
+    totalCount,
+    placeholder
   }: {
     title: string;
     items: string[];
@@ -103,76 +104,69 @@ const Settings = () => {
     onAdd: () => void;
     onRemove: (item: string) => void;
     totalCount: number;
+    placeholder: string;
   }) => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <SettingsIcon className="mr-2 h-5 w-5" />
+    <Card className="h-fit">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center text-lg">
+          <SettingsIcon className="mr-2 h-4 w-4" />
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Add new item */}
-          <div className="flex space-x-2">
-            <Input
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-              placeholder={
-                title === t('settings.paidVia') 
-                  ? t('settings.addNewPaidVia')
-                  : title === t('settings.serviceTypes')
-                  ? t('settings.addNewServiceType')
-                  : title === t('settings.providerNames')
-                  ? t('settings.addNewProvider')
-                  : t('settings.addNewCurrency')
-              }
-              onKeyPress={(e) => e.key === 'Enter' && onAdd()}
-            />
-            <Button onClick={onAdd} className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* List items */}
-          <div className="space-y-2">
-            {items.map((item, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">{item}</span>
-                <div className="flex space-x-2">
-                  <Button variant="ghost" size="sm">
-                    <Edit className="h-4 w-4 text-gray-500" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => onRemove(item)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-sm text-gray-500">
-            {t('settings.totalItems').replace('{count}', totalCount.toString())}
-          </p>
+      <CardContent className="space-y-3">
+        {/* Add new item */}
+        <div className="flex space-x-2">
+          <Input
+            value={newValue}
+            onChange={(e) => setNewValue(e.target.value)}
+            placeholder={placeholder}
+            onKeyPress={(e) => e.key === 'Enter' && onAdd()}
+            className="text-sm"
+          />
+          <Button onClick={onAdd} size="sm" className="bg-blue-600 hover:bg-blue-700 px-3">
+            <Plus className="h-3 w-3" />
+          </Button>
         </div>
+
+        {/* List items */}
+        <div className="space-y-1 max-h-40 overflow-y-auto">
+          {items.map((item, index) => (
+            <div key={`${item}-${index}`} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+              <span className="font-medium">{item}</span>
+              <div className="flex space-x-1">
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <Edit className="h-3 w-3 text-gray-500" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => onRemove(item)}
+                  className="h-6 w-6 p-0"
+                >
+                  <Trash2 className="h-3 w-3 text-red-500" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-xs text-gray-500">
+          {t('settings.totalItems').replace('{count}', totalCount.toString())}
+        </p>
       </CardContent>
     </Card>
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 max-w-6xl">
       {/* Header */}
       <div className="flex items-center space-x-3">
-        <SettingsIcon className="h-8 w-8 text-gray-600" />
-        <h1 className="text-2xl font-bold text-gray-900">{t('settings.title')}</h1>
+        <SettingsIcon className="h-6 w-6 text-gray-600" />
+        <h1 className="text-xl font-bold text-gray-900">{t('settings.title')}</h1>
       </div>
 
       {/* Settings Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* Paid Via Options */}
         <SettingsSection
           title={t('settings.paidVia')}
@@ -182,6 +176,7 @@ const Settings = () => {
           onAdd={addPaidViaOption}
           onRemove={removePaidViaOption}
           totalCount={paidViaOptions.length}
+          placeholder={t('settings.addNewPaidVia')}
         />
 
         {/* Service Types */}
@@ -193,17 +188,19 @@ const Settings = () => {
           onAdd={addServiceType}
           onRemove={removeServiceType}
           totalCount={serviceTypes.length}
+          placeholder={t('settings.addNewServiceType')}
         />
 
         {/* Provider Names */}
         <SettingsSection
-          title={t('settings.providerNames')}
+          title="Provider Names"
           items={providerNames}
           newValue={newProviderName}
           setNewValue={setNewProviderName}
           onAdd={addProviderName}
           onRemove={removeProviderName}
           totalCount={providerNames.length}
+          placeholder={t('settings.addNewProvider')}
         />
 
         {/* Currency Section */}
@@ -215,6 +212,7 @@ const Settings = () => {
           onAdd={addCurrency}
           onRemove={removeCurrency}
           totalCount={currencies.length}
+          placeholder={t('settings.addNewCurrency')}
         />
       </div>
     </div>
