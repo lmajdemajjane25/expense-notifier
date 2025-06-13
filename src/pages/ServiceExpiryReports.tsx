@@ -7,13 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, FileText } from 'lucide-react';
+import { Mail, FileText, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const ServiceExpiryReports = () => {
   const { t } = useLanguage();
   const { getExpiringServices, getServicesByStatus } = useService();
   const { toast } = useToast();
   const [emailAddress, setEmailAddress] = useState('');
+  const [sendingReport, setSendingReport] = useState<string | null>(null);
 
   const expiring7Days = getExpiringServices(7);
   const expiring3Days = getExpiringServices(3);
@@ -25,7 +27,7 @@ const ServiceExpiryReports = () => {
   const expired10Days = getServicesByStatus('expired').slice(0, 4);
   const expired30Days = getServicesByStatus('expired');
 
-  const handleSendReport = (reportType: string) => {
+  const handleSendReport = async (reportType: string) => {
     if (!emailAddress) {
       toast({
         title: t('common.error'),
@@ -35,11 +37,72 @@ const ServiceExpiryReports = () => {
       return;
     }
 
-    // Mock email sending
-    toast({
-      title: t('common.success'),
-      description: `Report sent to ${emailAddress}`,
-    });
+    // Get services based on report type
+    let services;
+    switch (reportType) {
+      case 'expiring7':
+        services = expiring7Days;
+        break;
+      case 'expiring3':
+        services = expiring3Days;
+        break;
+      case 'expiringToday':
+        services = expiringToday;
+        break;
+      case 'expired2':
+        services = expired2Days;
+        break;
+      case 'expired5':
+        services = expired5Days;
+        break;
+      case 'expired10':
+        services = expired10Days;
+        break;
+      case 'expired30':
+        services = expired30Days;
+        break;
+      default:
+        services = [];
+    }
+
+    if (services.length === 0) {
+      toast({
+        title: t('common.info'),
+        description: 'No services found for this report type',
+        variant: 'default'
+      });
+      return;
+    }
+
+    setSendingReport(reportType);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-expiry-report', {
+        body: {
+          email: emailAddress,
+          reportType,
+          services
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: t('common.success'),
+        description: data.message || `Report sent to ${emailAddress}`,
+      });
+    } catch (error: any) {
+      console.error('Error sending report:', error);
+      toast({
+        title: t('common.error'),
+        description: error.message || 'Failed to send report',
+        variant: 'destructive'
+      });
+    } finally {
+      setSendingReport(null);
+    }
   };
 
   const ReportButton = ({ 
@@ -57,8 +120,13 @@ const ServiceExpiryReports = () => {
       onClick={() => handleSendReport(reportType)}
       variant={variant}
       className="w-full h-16 flex items-center justify-center space-x-2"
+      disabled={sendingReport === reportType || !emailAddress}
     >
-      <Mail className="h-4 w-4" />
+      {sendingReport === reportType ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Mail className="h-4 w-4" />
+      )}
       <div className="text-center">
         <div className="text-sm font-medium">{title}</div>
         <div className="text-xs opacity-75">{count} services</div>
@@ -91,6 +159,12 @@ const ServiceExpiryReports = () => {
               placeholder={t('expiryReports.enterEmail')}
             />
           </div>
+          {sendingReport && (
+            <div className="text-sm text-blue-600 flex items-center space-x-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Sending report...</span>
+            </div>
+          )}
         </CardContent>
       </Card>
 
