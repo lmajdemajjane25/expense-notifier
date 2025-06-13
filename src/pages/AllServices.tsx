@@ -14,17 +14,26 @@ const AllServices = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [providerFilter, setProviderFilter] = useState('all');
+  const [frequencyFilter, setFrequencyFilter] = useState('all');
+  const [paidViaFilter, setPaidViaFilter] = useState('all');
 
   const filteredServices = services.filter(service => {
     const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          service.provider.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || service.status === statusFilter;
     const matchesType = typeFilter === 'all' || service.type === typeFilter;
+    const matchesProvider = providerFilter === 'all' || service.provider === providerFilter;
+    const matchesFrequency = frequencyFilter === 'all' || service.frequency === frequencyFilter;
+    const matchesPaidVia = paidViaFilter === 'all' || service.paidVia === paidViaFilter;
     
-    return matchesSearch && matchesStatus && matchesType;
+    return matchesSearch && matchesStatus && matchesType && matchesProvider && matchesFrequency && matchesPaidVia;
   });
 
   const serviceTypes = Array.from(new Set(services.map(service => service.type)));
+  const providers = Array.from(new Set(services.map(service => service.provider)));
+  const frequencies = Array.from(new Set(services.map(service => service.frequency)));
+  const paidViaMethods = Array.from(new Set(services.map(service => service.paidVia).filter(Boolean)));
 
   return (
     <div className="space-y-6">
@@ -99,7 +108,7 @@ const AllServices = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -128,6 +137,39 @@ const AllServices = () => {
                 <SelectItem value="all">{t('services.allTypes')}</SelectItem>
                 {serviceTypes.map(type => (
                   <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={providerFilter} onValueChange={setProviderFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Providers" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Providers</SelectItem>
+                {providers.map(provider => (
+                  <SelectItem key={provider} value={provider}>{provider}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={frequencyFilter} onValueChange={setFrequencyFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Frequencies" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Frequencies</SelectItem>
+                {frequencies.map(frequency => (
+                  <SelectItem key={frequency} value={frequency}>{frequency}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={paidViaFilter} onValueChange={setPaidViaFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Payment Methods" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payment Methods</SelectItem>
+                {paidViaMethods.map(method => (
+                  <SelectItem key={method} value={method}>{method}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

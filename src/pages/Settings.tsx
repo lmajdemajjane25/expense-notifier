@@ -23,6 +23,15 @@ const Settings = () => {
     'Software'
   ]);
 
+  const [providerNames, setProviderNames] = useState([
+    'AWS',
+    'Google',
+    'Microsoft',
+    'OVH',
+    'Contabo',
+    'DigitalOcean'
+  ]);
+
   const [currencies, setCurrencies] = useState([
     'USD',
     'EUR',
@@ -31,6 +40,7 @@ const Settings = () => {
 
   const [newPaidVia, setNewPaidVia] = useState('');
   const [newServiceType, setNewServiceType] = useState('');
+  const [newProviderName, setNewProviderName] = useState('');
   const [newCurrency, setNewCurrency] = useState('');
 
   const addPaidViaOption = () => {
@@ -47,6 +57,13 @@ const Settings = () => {
     }
   };
 
+  const addProviderName = () => {
+    if (newProviderName && !providerNames.includes(newProviderName)) {
+      setProviderNames([...providerNames, newProviderName]);
+      setNewProviderName('');
+    }
+  };
+
   const addCurrency = () => {
     if (newCurrency && !currencies.includes(newCurrency)) {
       setCurrencies([...currencies, newCurrency]);
@@ -60,6 +77,10 @@ const Settings = () => {
 
   const removeServiceType = (type: string) => {
     setServiceTypes(serviceTypes.filter(item => item !== type));
+  };
+
+  const removeProviderName = (provider: string) => {
+    setProviderNames(providerNames.filter(item => item !== provider));
   };
 
   const removeCurrency = (currency: string) => {
@@ -102,6 +123,8 @@ const Settings = () => {
                   ? t('settings.addNewPaidVia')
                   : title === t('settings.serviceTypes')
                   ? t('settings.addNewServiceType')
+                  : title === t('settings.providerNames')
+                  ? t('settings.addNewProvider')
                   : t('settings.addNewCurrency')
               }
               onKeyPress={(e) => e.key === 'Enter' && onAdd()}
@@ -171,10 +194,19 @@ const Settings = () => {
           onRemove={removeServiceType}
           totalCount={serviceTypes.length}
         />
-      </div>
 
-      {/* Currency Section */}
-      <div className="max-w-2xl">
+        {/* Provider Names */}
+        <SettingsSection
+          title={t('settings.providerNames')}
+          items={providerNames}
+          newValue={newProviderName}
+          setNewValue={setNewProviderName}
+          onAdd={addProviderName}
+          onRemove={removeProviderName}
+          totalCount={providerNames.length}
+        />
+
+        {/* Currency Section */}
         <SettingsSection
           title={t('settings.currency')}
           items={currencies}

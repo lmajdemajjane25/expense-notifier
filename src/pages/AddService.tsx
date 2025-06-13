@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useToast } from '@/hooks/use-toast';
 
 const AddService = () => {
@@ -25,10 +26,11 @@ const AddService = () => {
     amount: '',
     currency: 'USD',
     frequency: '',
-    expirationDate: '',
-    registerDate: '',
     paidVia: ''
   });
+
+  const [expirationDate, setExpirationDate] = useState<Date | undefined>();
+  const [registerDate, setRegisterDate] = useState<Date | undefined>();
 
   const serviceTypes = ['Hosting', 'Domain', 'Email', 'Software', 'Cloud Storage', 'VPS', 'CDN', 'Security'];
   const providers = ['AWS', 'Google', 'Microsoft', 'OVH', 'Contabo', 'DigitalOcean', 'Cloudflare', 'Other'];
@@ -39,7 +41,7 @@ const AddService = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.type || !formData.provider || !formData.amount || !formData.expirationDate) {
+    if (!formData.name || !formData.type || !formData.provider || !formData.amount || !expirationDate) {
       toast({
         title: t('common.error'),
         description: 'Please fill in all required fields',
@@ -56,8 +58,8 @@ const AddService = () => {
       amount: parseFloat(formData.amount),
       currency: formData.currency,
       frequency: formData.frequency,
-      expirationDate: formData.expirationDate,
-      registerDate: formData.registerDate || new Date().toISOString().split('T')[0],
+      expirationDate: expirationDate.toISOString().split('T')[0],
+      registerDate: registerDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
       paidVia: formData.paidVia
     });
 
@@ -191,23 +193,20 @@ const AddService = () => {
               {/* Expiration Date */}
               <div className="space-y-2">
                 <Label htmlFor="expirationDate">{t('addService.expirationDate')} *</Label>
-                <Input
-                  id="expirationDate"
-                  type="date"
-                  value={formData.expirationDate}
-                  onChange={(e) => handleInputChange('expirationDate', e.target.value)}
-                  required
+                <DatePicker
+                  date={expirationDate}
+                  onDateChange={setExpirationDate}
+                  placeholder="Select expiration date"
                 />
               </div>
 
               {/* Register Date */}
               <div className="space-y-2">
                 <Label htmlFor="registerDate">{t('addService.registerDate')}</Label>
-                <Input
-                  id="registerDate"
-                  type="date"
-                  value={formData.registerDate}
-                  onChange={(e) => handleInputChange('registerDate', e.target.value)}
+                <DatePicker
+                  date={registerDate}
+                  onDateChange={setRegisterDate}
+                  placeholder="Select register date"
                 />
               </div>
             </div>
