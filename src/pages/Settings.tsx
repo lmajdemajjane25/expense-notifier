@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,49 +43,49 @@ const Settings = () => {
   const [newProviderName, setNewProviderName] = useState('');
   const [newCurrency, setNewCurrency] = useState('');
 
-  const addPaidViaOption = useCallback(() => {
+  const addPaidViaOption = () => {
     if (newPaidVia && !paidViaOptions.includes(newPaidVia)) {
       setPaidViaOptions(prev => [...prev, newPaidVia]);
       setNewPaidVia('');
     }
-  }, [newPaidVia, paidViaOptions]);
+  };
 
-  const addServiceType = useCallback(() => {
+  const addServiceType = () => {
     if (newServiceType && !serviceTypes.includes(newServiceType)) {
       setServiceTypes(prev => [...prev, newServiceType]);
       setNewServiceType('');
     }
-  }, [newServiceType, serviceTypes]);
+  };
 
-  const addProviderName = useCallback(() => {
+  const addProviderName = () => {
     if (newProviderName && !providerNames.includes(newProviderName)) {
       setProviderNames(prev => [...prev, newProviderName]);
       setNewProviderName('');
     }
-  }, [newProviderName, providerNames]);
+  };
 
-  const addCurrency = useCallback(() => {
+  const addCurrency = () => {
     if (newCurrency && !currencies.includes(newCurrency)) {
       setCurrencies(prev => [...prev, newCurrency]);
       setNewCurrency('');
     }
-  }, [newCurrency, currencies]);
+  };
 
-  const removePaidViaOption = useCallback((option: string) => {
+  const removePaidViaOption = (option: string) => {
     setPaidViaOptions(prev => prev.filter(item => item !== option));
-  }, []);
+  };
 
-  const removeServiceType = useCallback((type: string) => {
+  const removeServiceType = (type: string) => {
     setServiceTypes(prev => prev.filter(item => item !== type));
-  }, []);
+  };
 
-  const removeProviderName = useCallback((provider: string) => {
+  const removeProviderName = (provider: string) => {
     setProviderNames(prev => prev.filter(item => item !== provider));
-  }, []);
+  };
 
-  const removeCurrency = useCallback((currency: string) => {
+  const removeCurrency = (currency: string) => {
     setCurrencies(prev => prev.filter(item => item !== currency));
-  }, []);
+  };
 
   const SettingsSection = ({ 
     title, 
@@ -107,13 +107,13 @@ const Settings = () => {
     placeholder: string;
   }) => (
     <Card className="h-fit">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center text-lg">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center text-base">
           <SettingsIcon className="mr-2 h-4 w-4" />
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
         {/* Add new item */}
         <div className="flex space-x-2">
           <Input
@@ -129,7 +129,7 @@ const Settings = () => {
         </div>
 
         {/* List items */}
-        <div className="space-y-1 max-h-40 overflow-y-auto">
+        <div className="space-y-2 max-h-48 overflow-y-auto">
           {items.map((item, index) => (
             <div key={`${item}-${index}`} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
               <span className="font-medium">{item}</span>
@@ -158,7 +158,7 @@ const Settings = () => {
   );
 
   return (
-    <div className="space-y-4 max-w-6xl">
+    <div className="space-y-6 max-w-6xl">
       {/* Header */}
       <div className="flex items-center space-x-3">
         <SettingsIcon className="h-6 w-6 text-gray-600" />
@@ -166,7 +166,7 @@ const Settings = () => {
       </div>
 
       {/* Settings Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         {/* Paid Via Options */}
         <SettingsSection
           title={t('settings.paidVia')}

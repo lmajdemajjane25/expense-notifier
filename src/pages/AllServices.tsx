@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useService } from '@/contexts/ServiceContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,16 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileDown, Upload, Search, Filter } from 'lucide-react';
+import { toast } from 'sonner';
 
 const AllServices = () => {
   const { t } = useLanguage();
-  const { services, exportServicesCSV } = useService();
+  const { services, exportServicesCSV, addService } = useService();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [providerFilter, setProviderFilter] = useState('all');
   const [frequencyFilter, setFrequencyFilter] = useState('all');
   const [paidViaFilter, setPaidViaFilter] = useState('all');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredServices = services.filter(service => {
     const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -34,6 +36,77 @@ const AllServices = () => {
   const providers = Array.from(new Set(services.map(service => service.provider)));
   const frequencies = Array.from(new Set(services.map(service => service.frequency)));
   const paidViaMethods = Array.from(new Set(services.map(service => service.paidVia).filter(Boolean)));
+
+  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        toast.error('File must contain at least a header and one data row');
+        return;
+      }
+
+      const headers = lines[0].split(';');
+      const expectedHeaders = ['name', 'description', 'expirationDate', 'registeredDate', 'serviceType', 'providerName', 'amountPaid', 'frequency', 'paidVia', 'currency'];
+      
+      // Check if headers match expected format
+      const headerCheck = expectedHeaders.every(expected => 
+        headers.some(header => header.toLowerCase().includes(expected.toLowerCase()))
+      );
+
+      if (!headerCheck) {
+        toast.error('Invalid file format. Please check the expected headers.');
+        return;
+      }
+
+      let importedCount = 0;
+      let errorCount = 0;
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(';');
+        if (values.length >= 10) {
+          try {
+            const serviceData = {
+              name: values[0]?.trim() || '',
+              description: values[1]?.trim() || '',
+              expirationDate: values[2]?.trim() || '',
+              registerDate: values[3]?.trim() || '',
+              type: values[4]?.trim() || '',
+              provider: values[5]?.trim() || '',
+              amount: parseFloat(values[6]?.trim() || '0'),
+              frequency: values[7]?.trim() || '',
+              paidVia: values[8]?.trim() || '',
+              currency: values[9]?.trim() || 'USD'
+            };
+
+            if (serviceData.name && serviceData.expirationDate && serviceData.registerDate) {
+              addService(serviceData);
+              importedCount++;
+            } else {
+              errorCount++;
+            }
+          } catch (error) {
+            errorCount++;
+          }
+        } else {
+          errorCount++;
+        }
+      }
+
+      toast.success(`Import completed: ${importedCount} services imported${errorCount > 0 ? `, ${errorCount} errors` : ''}`);
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      toast.error('Failed to parse file. Please check the file format.');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -80,8 +153,20 @@ const AllServices = () => {
                 {t('services.importFromCSV')}
               </p>
               <div className="space-y-2">
-                <Input type="file" accept=".csv,.txt" />
-                <p className="text-xs text-gray-500">{t('services.noFileChosen')}</p>
+                <Input 
+                  ref={fileInputRef}
+                  type="file" 
+                  accept=".csv,.txt" 
+                  onChange={handleFileImport}
+                  className="cursor-pointer"
+                />
+                <Button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Choose File & Import
+                </Button>
               </div>
             </div>
           </div>
