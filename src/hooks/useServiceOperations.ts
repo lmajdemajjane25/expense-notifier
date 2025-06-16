@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Service, ImportError } from '@/types/service';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useServiceOperations = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [importErrors, setImportErrors] = useState<ImportError[]>([]);
+  const { user } = useAuth();
 
   // Calculate service status based on expiration date
   const calculateStatus = (expirationDate: string): Service['status'] => {
@@ -21,6 +23,11 @@ export const useServiceOperations = () => {
   };
 
   const loadServices = async () => {
+    if (!user) {
+      console.log('No user authenticated, skipping service load');
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('services')
@@ -52,6 +59,11 @@ export const useServiceOperations = () => {
   };
 
   const loadImportErrors = async () => {
+    if (!user) {
+      console.log('No user authenticated, skipping import errors load');
+      return;
+    }
+
     try {
       const { data, error } = await supabase.rpc('get_import_errors');
 
@@ -69,10 +81,12 @@ export const useServiceOperations = () => {
   };
 
   const addService = async (serviceData: Omit<Service, 'id' | 'status'>) => {
-    try {
-      // Use a placeholder user_id until authentication is implemented
-      const placeholderUserId = '00000000-0000-0000-0000-000000000000';
+    if (!user) {
+      toast.error('You must be logged in to add services');
+      return;
+    }
 
+    try {
       const insertData = {
         name: serviceData.name,
         description: serviceData.description,
@@ -85,7 +99,7 @@ export const useServiceOperations = () => {
         type: serviceData.type,
         provider: serviceData.provider,
         paid_via: serviceData.paidVia,
-        user_id: placeholderUserId
+        user_id: user.id
       };
 
       const { error } = await supabase
@@ -103,6 +117,11 @@ export const useServiceOperations = () => {
   };
 
   const updateService = async (id: string, serviceData: Partial<Service>) => {
+    if (!user) {
+      toast.error('You must be logged in to update services');
+      return;
+    }
+
     try {
       const updateData: any = {};
       if (serviceData.name) updateData.name = serviceData.name;
@@ -135,6 +154,11 @@ export const useServiceOperations = () => {
   };
 
   const deleteService = async (id: string) => {
+    if (!user) {
+      toast.error('You must be logged in to delete services');
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('services')
@@ -152,6 +176,11 @@ export const useServiceOperations = () => {
   };
 
   const clearImportErrors = async () => {
+    if (!user) {
+      toast.error('You must be logged in to clear import errors');
+      return;
+    }
+
     try {
       const { error } = await supabase.rpc('clear_import_errors');
 

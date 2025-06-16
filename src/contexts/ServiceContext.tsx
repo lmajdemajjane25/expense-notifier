@@ -3,6 +3,7 @@ import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import { Service, ImportError } from '@/types/service';
 import { useServiceOperations } from '@/hooks/useServiceOperations';
 import { useServiceCalculations } from '@/hooks/useServiceCalculations';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ServiceContextType {
   services: Service[];
@@ -21,6 +22,7 @@ interface ServiceContextType {
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 
 export const ServiceProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
   const {
     services,
     importErrors,
@@ -40,9 +42,15 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
   } = useServiceCalculations(services);
 
   useEffect(() => {
-    loadServices();
-    loadImportErrors();
-  }, []);
+    if (user) {
+      console.log('User authenticated, loading services and import errors');
+      loadServices();
+      loadImportErrors();
+    } else {
+      console.log('User not authenticated, clearing services');
+      // Clear services when user logs out
+    }
+  }, [user]);
 
   return (
     <ServiceContext.Provider
