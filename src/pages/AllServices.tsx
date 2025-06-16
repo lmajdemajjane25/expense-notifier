@@ -49,6 +49,18 @@ const AllServices = () => {
     }
   };
 
+  const parseDateFromDDMMYYYY = (dateString: string): string => {
+    // Parse DD/MM/YYYY format and convert to YYYY-MM-DD for internal use
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      const day = parts[0].padStart(2, '0');
+      const month = parts[1].padStart(2, '0');
+      const year = parts[2];
+      return `${year}-${month}-${day}`;
+    }
+    return dateString; // Return as-is if format doesn't match
+  };
+
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -87,8 +99,8 @@ const AllServices = () => {
             const serviceData = {
               name: values[0]?.trim() || '',
               description: values[1]?.trim() || '',
-              expirationDate: values[2]?.trim() || '',
-              registerDate: values[3]?.trim() || '',
+              expirationDate: parseDateFromDDMMYYYY(values[2]?.trim() || ''),
+              registerDate: parseDateFromDDMMYYYY(values[3]?.trim() || ''),
               type: values[4]?.trim() || '',
               provider: values[5]?.trim() || '',
               amount: parseFloat(values[6]?.trim() || '0'),
