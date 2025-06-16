@@ -1,5 +1,7 @@
+
 import { useState } from 'react';
-import { useUserManagement, UserProfile } from '@/hooks/useUserManagement';
+import { useUserManagement } from '@/hooks/useUserManagement';
+import { UserProfile, UserRole } from '@/types/user';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,8 +11,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Users, Plus, Trash2, Loader2 } from 'lucide-react';
-
-type UserRole = 'normal' | 'admin' | 'super_user';
 
 const UserManagement = () => {
   const { users, loading, createUser, deleteUser, updateUserRole } = useUserManagement();
