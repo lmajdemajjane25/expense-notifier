@@ -4,7 +4,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://notifier.majjane.net/api' 
   : 'http://localhost:3001/api';
 
-// Create a query builder that supports chaining
+// Create a query builder that supports chaining and returns proper Promises
 class QueryBuilder {
   private table: string;
   private columns: string;
@@ -32,8 +32,8 @@ class QueryBuilder {
     return this;
   }
 
-  // Return a proper promise
-  async then(onFulfilled?: any, onRejected?: any) {
+  // Execute the query and return a proper Promise
+  private async execute() {
     try {
       let url = `${API_BASE_URL}/${this.table}?select=${this.columns}`;
       
@@ -53,31 +53,26 @@ class QueryBuilder {
       const response = await fetch(url);
       const data = await response.json();
       
-      const result = {
+      return {
         data: this.limitCount === 1 ? (data[0] || null) : data,
         error: response.ok ? null : data
       };
-      
-      if (onFulfilled) {
-        return onFulfilled(result);
-      }
-      return result;
     } catch (error) {
-      const result = { data: null, error };
-      if (onRejected) {
-        return onRejected(result);
-      }
-      if (onFulfilled) {
-        return onFulfilled(result);
-      }
-      return result;
+      return { data: null, error };
     }
+  }
+
+  // Return a proper Promise when awaited
+  then(onFulfilled?: any, onRejected?: any) {
+    return this.execute().then(onFulfilled, onRejected);
   }
 }
 
 class UpdateBuilder {
   private table: string;
   private values: any;
+  private whereColumn?: string;
+  private whereValue?: any;
 
   constructor(table: string, values: any) {
     this.table = table;
@@ -85,71 +80,67 @@ class UpdateBuilder {
   }
 
   eq(column: string, value: any) {
-    const self = this;
-    return {
-      async then(onFulfilled?: any, onRejected?: any) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/${self.table}/${value}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(self.values)
-          });
-          const data = await response.json();
-          const result = { data, error: response.ok ? null : data };
-          
-          if (onFulfilled) {
-            return onFulfilled(result);
-          }
-          return result;
-        } catch (error) {
-          const result = { data: null, error };
-          if (onRejected) {
-            return onRejected(result);
-          }
-          if (onFulfilled) {
-            return onFulfilled(result);
-          }
-          return result;
-        }
+    this.whereColumn = column;
+    this.whereValue = value;
+    return this;
+  }
+
+  private async execute() {
+    try {
+      if (!this.whereColumn || this.whereValue === undefined) {
+        throw new Error('WHERE condition is required for UPDATE');
       }
-    };
+
+      const response = await fetch(`${API_BASE_URL}/${this.table}/${this.whereValue}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.values)
+      });
+      const data = await response.json();
+      return { data, error: response.ok ? null : data };
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  then(onFulfilled?: any, onRejected?: any) {
+    return this.execute().then(onFulfilled, onRejected);
   }
 }
 
 class DeleteBuilder {
   private table: string;
+  private whereColumn?: string;
+  private whereValue?: any;
 
   constructor(table: string) {
     this.table = table;
   }
 
   eq(column: string, value: any) {
-    const self = this;
-    return {
-      async then(onFulfilled?: any, onRejected?: any) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/${self.table}/${value}`, {
-            method: 'DELETE'
-          });
-          const data = await response.json();
-          const result = { data, error: response.ok ? null : data };
-          
-          if (onFulfilled) {
-            return onFulfilled(result);
-          }
-          return result;
-        } catch (error) {
-          const result = { data: null, error };
-          if (onRejected) {
-            return onRejected(result);
-          }
-          if (onFulfilled) {
-            return onFulfilled(result);
-          }
-          return result;
-        }
+    this.whereColumn = column;
+    this.whereValue = value;
+    return this;
+  }
+
+  private async execute() {
+    try {
+      if (!this.whereColumn || this.whereValue === undefined) {
+        throw new Error('WHERE condition is required for DELETE');
       }
-    };
+
+      const response = await fetch(`${API_BASE_URL}/${this.table}/${this.whereValue}`, {
+        method: 'DELETE'
+      });
+      const data = await response.json();
+      return { data, error: response.ok ? null : data };
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  then(onFulfilled?: any, onRejected?: any) {
+    return this.execute().then(onFulfilled, onRejected);
   }
 }
 
