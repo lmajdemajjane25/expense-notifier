@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useUserManagement, UserProfile } from '@/hooks/useUserManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,7 +40,7 @@ const UserManagement = () => {
   };
 
   const handleRoleChange = async (user: UserProfile, newRole: UserRole) => {
-    const currentRole = user.roles[0]; // Assuming single role for simplicity
+    const currentRole = user.roles[0] as UserRole; // Type assertion for current role
     await updateUserRole(user.id, newRole, currentRole);
   };
 

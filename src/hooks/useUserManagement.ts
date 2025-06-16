@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -153,7 +152,7 @@ export const useUserManagement = () => {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: UserRole, oldRole?: string) => {
+  const updateUserRole = async (userId: string, newRole: UserRole, oldRole?: UserRole) => {
     try {
       // Remove old role if specified
       if (oldRole) {
