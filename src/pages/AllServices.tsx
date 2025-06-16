@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 const AllServices = () => {
   const { t } = useLanguage();
-  const { services, exportServicesCSV, addService, updateService, deleteService, importErrors, clearImportErrors } = useService();
+  const { services, exportServicesCSV, addService, updateService, renewService, deleteService, importErrors, clearImportErrors } = useService();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -106,6 +106,7 @@ const AllServices = () => {
       <ServicesTable
         services={filteredServices}
         updateService={updateService}
+        renewService={renewService}
         deleteService={deleteService}
       />
     </div>

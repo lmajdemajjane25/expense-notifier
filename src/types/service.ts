@@ -12,6 +12,7 @@ export interface Service {
   registerDate: string;
   paidVia: string;
   status: 'active' | 'expiring' | 'expired';
+  autoRenew: boolean;
 }
 
 export interface ImportError {

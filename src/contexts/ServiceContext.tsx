@@ -9,6 +9,7 @@ interface ServiceContextType {
   services: Service[];
   addService: (service: Omit<Service, 'id' | 'status'>) => Promise<void>;
   updateService: (id: string, service: Partial<Service>) => Promise<void>;
+  renewService: (id: string) => Promise<void>;
   deleteService: (id: string) => Promise<void>;
   getServicesByStatus: (status: Service['status']) => Service[];
   getExpiringServices: (days: number) => Service[];
@@ -30,6 +31,7 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
     loadImportErrors,
     addService,
     updateService,
+    renewService,
     deleteService,
     clearImportErrors
   } = useServiceOperations();
@@ -58,6 +60,7 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
         services,
         addService,
         updateService,
+        renewService,
         deleteService,
         getServicesByStatus,
         getExpiringServices,

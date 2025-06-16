@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { Edit, Trash2 } from 'lucide-react';
 import { Service } from '@/types/service';
 
@@ -28,7 +29,8 @@ export const ServiceActions = ({ service, onUpdate, onDelete }: ServiceActionsPr
     frequency: service.frequency,
     expirationDate: service.expirationDate,
     registerDate: service.registerDate,
-    paidVia: service.paidVia
+    paidVia: service.paidVia,
+    autoRenew: service.autoRenew
   });
 
   const handleUpdate = async () => {
@@ -101,6 +103,7 @@ export const ServiceActions = ({ service, onUpdate, onDelete }: ServiceActionsPr
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
                   <SelectItem value="yearly">Yearly</SelectItem>
                   <SelectItem value="weekly">Weekly</SelectItem>
                 </SelectContent>
@@ -125,6 +128,14 @@ export const ServiceActions = ({ service, onUpdate, onDelete }: ServiceActionsPr
                   onChange={(e) => setEditData({...editData, registerDate: e.target.value})}
                 />
               </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="autoRenew"
+                checked={editData.autoRenew}
+                onCheckedChange={(checked) => setEditData({...editData, autoRenew: checked})}
+              />
+              <Label htmlFor="autoRenew">Auto-Renew</Label>
             </div>
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setEditOpen(false)}>

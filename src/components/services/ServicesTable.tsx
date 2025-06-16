@@ -1,19 +1,23 @@
 
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ServiceActions } from '@/components/services/ServiceActions';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { format } from 'date-fns';
 import { Service } from '@/types/service';
+import { RefreshCw } from 'lucide-react';
 
 interface ServicesTableProps {
   services: Service[];
   updateService: (id: string, data: Partial<Service>) => Promise<void>;
+  renewService: (id: string) => Promise<void>;
   deleteService: (id: string) => Promise<void>;
 }
 
 export const ServicesTable = ({
   services,
   updateService,
+  renewService,
   deleteService
 }: ServicesTableProps) => {
   const { t } = useLanguage();
@@ -47,6 +51,9 @@ export const ServicesTable = ({
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Auto-Renew
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -86,11 +93,31 @@ export const ServicesTable = ({
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <ServiceActions
-                        service={service}
-                        onUpdate={updateService}
-                        onDelete={deleteService}
-                      />
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        service.autoRenew 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {service.autoRenew ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex space-x-2">
+                        <Button
+                          onClick={() => renewService(service.id)}
+                          variant="outline"
+                          size="sm"
+                          className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                        >
+                          <RefreshCw className="h-4 w-4 mr-1" />
+                          Renew
+                        </Button>
+                        <ServiceActions
+                          service={service}
+                          onUpdate={updateService}
+                          onDelete={deleteService}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -48,7 +48,8 @@ export const useServiceOperations = () => {
         expirationDate: service.expiration_date || '',
         registerDate: service.register_date || '',
         paidVia: service.paid_via || 'unknown',
-        status: calculateStatus(service.expiration_date || '')
+        status: calculateStatus(service.expiration_date || ''),
+        autoRenew: service.auto_renew || false
       }));
 
       setServices(formattedServices);
@@ -99,6 +100,7 @@ export const useServiceOperations = () => {
         type: serviceData.type,
         provider: serviceData.provider,
         paid_via: serviceData.paidVia,
+        auto_renew: serviceData.autoRenew,
         user_id: user.id
       };
 
@@ -137,6 +139,7 @@ export const useServiceOperations = () => {
       }
       if (serviceData.registerDate) updateData.register_date = serviceData.registerDate;
       if (serviceData.paidVia) updateData.paid_via = serviceData.paidVia;
+      if (serviceData.autoRenew !== undefined) updateData.auto_renew = serviceData.autoRenew;
 
       const { error } = await supabase
         .from('services')
@@ -150,6 +153,63 @@ export const useServiceOperations = () => {
     } catch (error) {
       console.error('Error updating service:', error);
       toast.error('Failed to update service');
+    }
+  };
+
+  const renewService = async (id: string) => {
+    if (!user) {
+      toast.error('You must be logged in to renew services');
+      return;
+    }
+
+    try {
+      // Get the current service
+      const service = services.find(s => s.id === id);
+      if (!service) {
+        toast.error('Service not found');
+        return;
+      }
+
+      // Calculate new expiration date based on frequency
+      const currentExpDate = new Date(service.expirationDate);
+      let newExpDate = new Date(currentExpDate);
+
+      switch (service.frequency) {
+        case 'monthly':
+          newExpDate.setMonth(newExpDate.getMonth() + 1);
+          break;
+        case 'quarterly':
+          newExpDate.setMonth(newExpDate.getMonth() + 3);
+          break;
+        case 'yearly':
+          newExpDate.setFullYear(newExpDate.getFullYear() + 1);
+          break;
+        case 'weekly':
+          newExpDate.setDate(newExpDate.getDate() + 7);
+          break;
+        default:
+          toast.error('Unknown frequency type');
+          return;
+      }
+
+      const updateData = {
+        expiration_date: newExpDate.toISOString().split('T')[0],
+        status: calculateStatus(newExpDate.toISOString().split('T')[0]),
+        last_payment: new Date().toISOString().split('T')[0]
+      };
+
+      const { error } = await supabase
+        .from('services')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      await loadServices();
+      toast.success('Service renewed successfully');
+    } catch (error) {
+      console.error('Error renewing service:', error);
+      toast.error('Failed to renew service');
     }
   };
 
@@ -207,6 +267,7 @@ export const useServiceOperations = () => {
     loadImportErrors,
     addService,
     updateService,
+    renewService,
     deleteService,
     clearImportErrors
   };
