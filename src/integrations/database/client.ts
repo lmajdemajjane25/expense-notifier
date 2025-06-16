@@ -1,9 +1,10 @@
 
-// Direct Supabase client that works with the actual Supabase database
+// Database client that can work with either Supabase or custom PostgreSQL database
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://rqxrwvhgdnxzumbrrplg.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxeHJ3dmhnZG54enVtYnJycGxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNTUzNjEsImV4cCI6MjA2MzkzMTM2MX0.XtJxIccunytStPetqTIHg692m5bJZ3rTwVt5sMfMZwI';
+// Get configuration from environment variables or fallback to Supabase defaults
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rqxrwvhgdnxzumbrrplg.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxeHJ3dmhnZG54enVtYnJycGxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNTUzNjEsImV4cCI6MjA2MzkzMTM2MX0.XtJxIccunytStPetqTIHg692m5bJZ3rTwVt5sMfMZwI';
 
 const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
