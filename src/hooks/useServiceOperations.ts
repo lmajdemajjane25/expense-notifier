@@ -70,13 +70,8 @@ export const useServiceOperations = () => {
 
   const addService = async (serviceData: Omit<Service, 'id' | 'status'>) => {
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.error('You must be logged in to add a service');
-        return;
-      }
+      // Use a placeholder user_id until authentication is implemented
+      const placeholderUserId = '00000000-0000-0000-0000-000000000000';
 
       const insertData = {
         name: serviceData.name,
@@ -90,7 +85,7 @@ export const useServiceOperations = () => {
         type: serviceData.type,
         provider: serviceData.provider,
         paid_via: serviceData.paidVia,
-        user_id: user.id
+        user_id: placeholderUserId
       };
 
       const { error } = await supabase
