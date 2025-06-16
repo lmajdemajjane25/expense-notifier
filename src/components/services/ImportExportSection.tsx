@@ -79,7 +79,8 @@ export const ImportExportSection = ({
               amount: parseFloat(values[6]?.trim() || '0'),
               frequency: values[7]?.trim() || '',
               paidVia: values[8]?.trim() || '',
-              currency: values[9]?.trim() || 'USD'
+              currency: values[9]?.trim() || 'USD',
+              autoRenew: false
             };
 
             if (serviceData.name && serviceData.expirationDate && serviceData.registerDate) {

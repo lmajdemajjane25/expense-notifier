@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -35,7 +34,7 @@ const AddService = () => {
   const serviceTypes = ['Hosting', 'Domain', 'Email', 'Software', 'Cloud Storage', 'VPS', 'CDN', 'Security'];
   const providers = ['AWS', 'Google', 'Microsoft', 'OVH', 'Contabo', 'DigitalOcean', 'Cloudflare', 'Other'];
   const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
-  const frequencies = ['monthly', 'yearly', 'weekly', 'daily'];
+  const frequencies = ['monthly', 'yearly', 'weekly', 'quarterly'];
   const paymentMethods = ['PayPal', 'Credit Card', 'Bank Transfer', 'Stripe', 'Other'];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -60,7 +59,8 @@ const AddService = () => {
       frequency: formData.frequency,
       expirationDate: expirationDate.toISOString().split('T')[0],
       registerDate: registerDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-      paidVia: formData.paidVia
+      paidVia: formData.paidVia,
+      autoRenew: false
     });
 
     toast({
