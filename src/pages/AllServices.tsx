@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useService } from '@/contexts/ServiceContext';
@@ -7,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileDown, Upload, Search, Filter, AlertCircle, X } from 'lucide-react';
+import { ServiceActions } from '@/components/services/ServiceActions';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 const AllServices = () => {
   const { t } = useLanguage();
-  const { services, exportServicesCSV, addService, importErrors, clearImportErrors } = useService();
+  const { services, exportServicesCSV, addService, updateService, deleteService, importErrors, clearImportErrors } = useService();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -41,16 +41,13 @@ const AllServices = () => {
 
   const logImportError = async (errorMessage: string, rowData: string) => {
     try {
-      // Log error locally for now since import_errors table might not exist
       console.error('Import Error:', errorMessage, 'Row:', rowData);
-      // You could implement a local error storage mechanism here
     } catch (error) {
       console.error('Error logging import error:', error);
     }
   };
 
   const parseDateFromDDMMYYYY = (dateString: string): string => {
-    // Parse DD/MM/YYYY format and convert to YYYY-MM-DD for internal use
     const parts = dateString.split('/');
     if (parts.length === 3) {
       const day = parts[0].padStart(2, '0');
@@ -58,7 +55,7 @@ const AllServices = () => {
       const year = parts[2];
       return `${year}-${month}-${day}`;
     }
-    return dateString; // Return as-is if format doesn't match
+    return dateString;
   };
 
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +74,6 @@ const AllServices = () => {
       const headers = lines[0].split(';');
       const expectedHeaders = ['name', 'description', 'expirationDate', 'registeredDate', 'serviceType', 'providerName', 'amountPaid', 'frequency', 'paidVia', 'currency'];
       
-      // Check if headers match expected format
       const headerCheck = expectedHeaders.every(expected => 
         headers.some(header => header.toLowerCase().includes(expected.toLowerCase()))
       );
@@ -135,7 +131,6 @@ const AllServices = () => {
         setShowImportErrors(true);
       }
       
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -158,7 +153,7 @@ const AllServices = () => {
           {t('services.addService')}
         </Button>
       </div>
-
+      
       {/* Import Errors Display */}
       {showImportErrors && importErrors.length > 0 && (
         <Card className="border-red-200 bg-red-50">
@@ -214,7 +209,6 @@ const AllServices = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Export Services */}
             <div>
               <h3 className="font-medium mb-2">{t('services.exportServices')}</h3>
               <p className="text-sm text-gray-600 mb-4">
@@ -229,7 +223,6 @@ const AllServices = () => {
               </Button>
             </div>
 
-            {/* Import Services */}
             <div>
               <h3 className="font-medium mb-2">{t('services.importServices')}</h3>
               <p className="text-sm text-gray-600 mb-4">
@@ -254,7 +247,6 @@ const AllServices = () => {
             </div>
           </div>
 
-          {/* Expected File Format */}
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <h4 className="font-medium mb-2">{t('services.expectedFileFormat')}</h4>
             <div className="text-sm text-gray-600 space-y-1">
@@ -375,6 +367,9 @@ const AllServices = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -408,6 +403,13 @@ const AllServices = () => {
                         }`}>
                           {service.status}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <ServiceActions
+                          service={service}
+                          onUpdate={updateService}
+                          onDelete={deleteService}
+                        />
                       </td>
                     </tr>
                   ))}
