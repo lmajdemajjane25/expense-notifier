@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { database } from '@/integrations/database/client';
 
 export const useUserRole = () => {
   const { user } = useAuth();
@@ -17,11 +17,12 @@ export const useUserRole = () => {
       }
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await database
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .single();
+          .single()
+          .execute();
 
         if (error) {
           console.error('Error fetching user role:', error);

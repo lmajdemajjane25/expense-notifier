@@ -1,5 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { database } from '@/integrations/database/client';
 import { UserRole } from '@/types/user';
 import { useToast } from '@/hooks/use-toast';
 
@@ -10,15 +10,16 @@ export const useUserRoles = () => {
     try {
       // Remove old role if specified
       if (oldRole) {
-        await supabase
+        await database
           .from('user_roles')
           .delete()
           .eq('user_id', userId)
-          .eq('role', oldRole);
+          .eq('role', oldRole)
+          .execute();
       }
 
       // Add new role with proper typing
-      const { error } = await supabase
+      const { error } = await database
         .from('user_roles')
         .insert({ 
           user_id: userId, 

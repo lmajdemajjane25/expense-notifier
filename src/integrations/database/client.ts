@@ -1,4 +1,5 @@
 
+
 // Custom database client that mimics Supabase structure
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://notifier.majjane.net/api' 
@@ -61,11 +62,6 @@ class QueryBuilder {
       return { data: null, error };
     }
   }
-
-  // Return a proper Promise when awaited
-  then(onFulfilled?: any, onRejected?: any) {
-    return this.execute().then(onFulfilled, onRejected);
-  }
 }
 
 class UpdateBuilder {
@@ -102,10 +98,6 @@ class UpdateBuilder {
       return { data: null, error };
     }
   }
-
-  then(onFulfilled?: any, onRejected?: any) {
-    return this.execute().then(onFulfilled, onRejected);
-  }
 }
 
 class DeleteBuilder {
@@ -137,10 +129,6 @@ class DeleteBuilder {
     } catch (error) {
       return { data: null, error };
     }
-  }
-
-  then(onFulfilled?: any, onRejected?: any) {
-    return this.execute().then(onFulfilled, onRejected);
   }
 }
 
@@ -175,3 +163,4 @@ export const database = {
     return { data, error: response.ok ? null : data };
   }
 };
+

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { database } from '@/integrations/database/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,10 +34,11 @@ const Settings = () => {
       if (authError) throw authError;
 
       // Update profile table
-      const { error: profileError } = await supabase
+      const { error: profileError } = await database
         .from('profiles')
         .update({ full_name: fullName })
-        .eq('id', user.id);
+        .eq('id', user.id)
+        .execute();
 
       if (profileError) throw profileError;
 

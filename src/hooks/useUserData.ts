@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { database } from '@/integrations/database/client';
 import { UserProfile } from '@/types/user';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,7 +13,7 @@ export const useUserData = () => {
     setLoading(true);
     try {
       // Get all profiles with their roles
-      const { data: profiles, error: profilesError } = await supabase
+      const { data: profiles, error: profilesError } = await database
         .from('profiles')
         .select(`
           id,
@@ -22,17 +22,19 @@ export const useUserData = () => {
           phone,
           status,
           created_at
-        `);
+        `)
+        .execute();
 
       if (profilesError) throw profilesError;
 
       // Get roles for each user
       const usersWithRoles = await Promise.all(
         (profiles || []).map(async (profile) => {
-          const { data: roles } = await supabase
+          const { data: roles } = await database
             .from('user_roles')
             .select('role')
-            .eq('user_id', profile.id);
+            .eq('user_id', profile.id)
+            .execute();
 
           return {
             ...profile,
