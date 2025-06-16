@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Settings as SettingsIcon, Users, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface UserProfile {
   id: string;
@@ -18,46 +19,22 @@ interface UserProfile {
   phone?: string;
   status: string;
   created_at: string;
-  roles: string[];
+  roles: Array<'normal' | 'super_user' | 'admin'>;
 }
+
+type UserRole = 'normal' | 'super_user' | 'admin';
 
 const Settings = () => {
   const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const [users, setUsers] = useState<UserProfile[]>([]);
-  const [userRole, setUserRole] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<string | null>(null);
-  const [newRole, setNewRole] = useState<string>('');
-
-  // Check current user's role
-  useEffect(() => {
-    const checkUserRole = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error checking user role:', error);
-          return;
-        }
-
-        setUserRole(data?.role || 'normal');
-      } catch (error) {
-        console.error('Error checking user role:', error);
-      }
-    };
-
-    checkUserRole();
-  }, [user]);
+  const [newRole, setNewRole] = useState<UserRole>('normal');
 
   // Load all users (only for admins)
   const loadUsers = useCallback(async () => {
-    if (!user || userRole !== 'admin') return;
+    if (!user || !isAdmin) return;
 
     setLoading(true);
     try {
@@ -79,7 +56,7 @@ const Settings = () => {
       // Combine profiles with roles
       const usersWithRoles = (profiles || []).map(profile => ({
         ...profile,
-        roles: roles?.filter(role => role.user_id === profile.id).map(role => role.role) || []
+        roles: roles?.filter(role => role.user_id === profile.id).map(role => role.role as UserRole) || []
       }));
 
       setUsers(usersWithRoles);
@@ -89,17 +66,19 @@ const Settings = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, userRole]);
+  }, [user, isAdmin]);
 
   useEffect(() => {
-    if (userRole === 'admin') {
+    if (!roleLoading && isAdmin) {
       loadUsers();
+    } else if (!roleLoading && !isAdmin) {
+      setLoading(false);
     }
-  }, [userRole, loadUsers]);
+  }, [isAdmin, roleLoading, loadUsers]);
 
   // Add or update user role
-  const handleRoleChange = async (userId: string, role: string) => {
-    if (userRole !== 'admin') {
+  const handleRoleChange = async (userId: string, role: UserRole) => {
+    if (!isAdmin) {
       toast.error('You do not have permission to change user roles');
       return;
     }
@@ -114,14 +93,14 @@ const Settings = () => {
       // Then add the new role
       const { error } = await supabase
         .from('user_roles')
-        .insert([{ user_id: userId, role }]);
+        .insert({ user_id: userId, role });
 
       if (error) throw error;
 
       toast.success('User role updated successfully');
       loadUsers();
       setEditingUser(null);
-      setNewRole('');
+      setNewRole('normal');
     } catch (error) {
       console.error('Error updating user role:', error);
       toast.error('Failed to update user role');
@@ -130,7 +109,7 @@ const Settings = () => {
 
   // Delete user (only admins can delete)
   const handleDeleteUser = async (userId: string) => {
-    if (userRole !== 'admin') {
+    if (!isAdmin) {
       toast.error('You do not have permission to delete users');
       return;
     }
@@ -163,7 +142,7 @@ const Settings = () => {
     }
   };
 
-  const getRoleBadgeColor = (role: string) => {
+  const getRoleBadgeColor = (role: UserRole) => {
     switch (role) {
       case 'admin': return 'bg-red-500';
       case 'super_user': return 'bg-orange-500';
@@ -171,8 +150,29 @@ const Settings = () => {
     }
   };
 
+  const getRoleDisplayName = (role: UserRole) => {
+    return role === 'super_user' ? 'Super User' : role.charAt(0).toUpperCase() + role.slice(1);
+  };
+
+  if (roleLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center space-x-3">
+          <SettingsIcon className="h-5 w-5 text-gray-600" />
+          <h1 className="text-lg font-bold text-gray-900">Settings</h1>
+        </div>
+        
+        <Card>
+          <CardContent className="p-6 text-center">
+            <div className="text-gray-500">Loading...</div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Show access denied for non-admin users
-  if (userRole !== 'admin') {
+  if (!isAdmin) {
     return (
       <div className="space-y-4">
         <div className="flex items-center space-x-3">
@@ -185,7 +185,6 @@ const Settings = () => {
             <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
             <p className="text-gray-500">You need admin privileges to access user management settings.</p>
-            <Badge className="mt-4">{userRole}</Badge>
           </CardContent>
         </Card>
       </div>
@@ -238,7 +237,7 @@ const Settings = () => {
                     <TableCell>
                       {editingUser === userProfile.id ? (
                         <div className="flex space-x-2">
-                          <Select value={newRole} onValueChange={setNewRole}>
+                          <Select value={newRole} onValueChange={(value: UserRole) => setNewRole(value)}>
                             <SelectTrigger className="w-32">
                               <SelectValue placeholder="Select role" />
                             </SelectTrigger>
@@ -251,7 +250,6 @@ const Settings = () => {
                           <Button 
                             size="sm" 
                             onClick={() => handleRoleChange(userProfile.id, newRole)}
-                            disabled={!newRole}
                           >
                             Save
                           </Button>
@@ -260,7 +258,7 @@ const Settings = () => {
                             variant="outline"
                             onClick={() => {
                               setEditingUser(null);
-                              setNewRole('');
+                              setNewRole('normal');
                             }}
                           >
                             Cancel
@@ -273,7 +271,7 @@ const Settings = () => {
                               key={role} 
                               className={`text-white ${getRoleBadgeColor(role)}`}
                             >
-                              {role === 'super_user' ? 'Super User' : role}
+                              {getRoleDisplayName(role)}
                             </Badge>
                           ))}
                           {userProfile.roles.length === 0 && (
