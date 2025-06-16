@@ -29,13 +29,13 @@ export function DatePicker({
   className,
 }: DatePickerProps) {
   const [inputValue, setInputValue] = React.useState(
-    date ? format(date, "dd/MM/yy") : ""
+    date ? format(date, "dd/MM/yyyy") : ""
   );
   const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (date) {
-      setInputValue(format(date, "dd/MM/yy"));
+      setInputValue(format(date, "dd/MM/yyyy"));
     } else {
       setInputValue("");
     }
@@ -45,19 +45,18 @@ export function DatePicker({
     const value = e.target.value;
     setInputValue(value);
     
-    // Try to parse the date in DD/MM/YY format
+    // Try to parse the date in DD/MM/YYYY format
     const dateParts = value.split('/');
     if (dateParts.length === 3) {
       const day = parseInt(dateParts[0], 10);
       const month = parseInt(dateParts[1], 10) - 1; // Month is 0-indexed
       const year = parseInt(dateParts[2], 10);
-      const fullYear = year < 50 ? 2000 + year : 1900 + year; // Assume years 00-49 are 2000s, 50-99 are 1900s
       
-      const parsedDate = new Date(fullYear, month, day);
+      const parsedDate = new Date(year, month, day);
       if (!isNaN(parsedDate.getTime()) && 
           parsedDate.getDate() === day && 
           parsedDate.getMonth() === month && 
-          parsedDate.getFullYear() === fullYear) {
+          parsedDate.getFullYear() === year) {
         onDateChange(parsedDate);
       }
     }
@@ -77,7 +76,7 @@ export function DatePicker({
           onChange={handleInputChange}
           disabled={disabled}
           className="rounded-r-none border-r-0"
-          placeholder="DD/MM/YY"
+          placeholder="DD/MM/YYYY"
         />
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>

@@ -247,9 +247,9 @@ const AllServices = () => {
             <h4 className="font-medium mb-2">{t('services.expectedFileFormat')}</h4>
             <div className="text-sm text-gray-600 space-y-1">
               <p><strong>{t('services.headers')}:</strong> name;description;expirationDate;registeredDate;serviceType;providerName;amountPaid;frequency;paidVia;currency</p>
-              <p><strong>{t('services.dateFormat')}:</strong> YYYY-MM-DD</p>
+              <p><strong>{t('services.dateFormat')}:</strong> DD/MM/YYYY</p>
               <p><strong>{t('services.separator')}:</strong> Semicolon (;)</p>
-              <p><strong>{t('services.example')}:</strong> AWS EC2;Cloud hosting service;2025-12-31;2024-01-15;hosting;Amazon;89.99;monthly;Credit Card;USD</p>
+              <p><strong>{t('services.example')}:</strong> AWS EC2;Cloud hosting service;31/12/2025;15/01/2024;hosting;Amazon;89.99;monthly;Credit Card;USD</p>
             </div>
           </div>
         </CardContent>
@@ -384,7 +384,7 @@ const AllServices = () => {
                         {service.frequency}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {format(new Date(service.expirationDate), 'dd/MM/yy')}
+                        {format(new Date(service.expirationDate), 'dd/MM/yyyy')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
