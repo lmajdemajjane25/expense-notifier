@@ -6,18 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileDown, Upload, Search, Filter } from 'lucide-react';
+import { FileDown, Upload, Search, Filter, AlertCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const AllServices = () => {
   const { t } = useLanguage();
-  const { services, exportServicesCSV, addService } = useService();
+  const { services, exportServicesCSV, addService, importErrors, clearImportErrors } = useService();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [providerFilter, setProviderFilter] = useState('all');
   const [frequencyFilter, setFrequencyFilter] = useState('all');
   const [paidViaFilter, setPaidViaFilter] = useState('all');
+  const [showImportErrors, setShowImportErrors] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredServices = services.filter(service => {
@@ -36,6 +38,19 @@ const AllServices = () => {
   const providers = Array.from(new Set(services.map(service => service.provider)));
   const frequencies = Array.from(new Set(services.map(service => service.frequency)));
   const paidViaMethods = Array.from(new Set(services.map(service => service.paidVia).filter(Boolean)));
+
+  const logImportError = async (errorMessage: string, rowData: string) => {
+    try {
+      await supabase
+        .from('import_errors')
+        .insert([{
+          error_message: errorMessage,
+          row_data: rowData
+        }]);
+    } catch (error) {
+      console.error('Error logging import error:', error);
+    }
+  };
 
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -59,7 +74,9 @@ const AllServices = () => {
       );
 
       if (!headerCheck) {
-        toast.error('Invalid file format. Please check the expected headers.');
+        const errorMsg = 'Invalid file format. Please check the expected headers.';
+        await logImportError(errorMsg, lines[0]);
+        toast.error(errorMsg);
         return;
       }
 
@@ -84,27 +101,39 @@ const AllServices = () => {
             };
 
             if (serviceData.name && serviceData.expirationDate && serviceData.registerDate) {
-              addService(serviceData);
+              await addService(serviceData);
               importedCount++;
             } else {
+              const errorMsg = 'Missing required fields: name, expirationDate, or registerDate';
+              await logImportError(errorMsg, lines[i]);
               errorCount++;
             }
           } catch (error) {
+            const errorMsg = `Error processing row: ${error instanceof Error ? error.message : 'Unknown error'}`;
+            await logImportError(errorMsg, lines[i]);
             errorCount++;
           }
         } else {
+          const errorMsg = 'Insufficient columns in row';
+          await logImportError(errorMsg, lines[i]);
           errorCount++;
         }
       }
 
       toast.success(`Import completed: ${importedCount} services imported${errorCount > 0 ? `, ${errorCount} errors` : ''}`);
       
+      if (errorCount > 0) {
+        setShowImportErrors(true);
+      }
+      
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     } catch (error) {
-      toast.error('Failed to parse file. Please check the file format.');
+      const errorMsg = 'Failed to parse file. Please check the file format.';
+      await logImportError(errorMsg, file.name);
+      toast.error(errorMsg);
     }
   };
 
@@ -120,6 +149,51 @@ const AllServices = () => {
           {t('services.addService')}
         </Button>
       </div>
+
+      {/* Import Errors Display */}
+      {showImportErrors && importErrors.length > 0 && (
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center text-red-800">
+                <AlertCircle className="mr-2 h-5 w-5" />
+                Import Errors ({importErrors.length})
+              </CardTitle>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={clearImportErrors}
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 border-red-300"
+                >
+                  Clear Errors
+                </Button>
+                <Button
+                  onClick={() => setShowImportErrors(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="max-h-40 overflow-y-auto space-y-2">
+              {importErrors.slice(0, 10).map((error) => (
+                <div key={error.id} className="text-sm bg-white p-2 rounded border-l-4 border-red-400">
+                  <p className="font-medium text-red-800">{error.error_message}</p>
+                  <p className="text-gray-600 text-xs mt-1">Row: {error.row_data}</p>
+                </div>
+              ))}
+              {importErrors.length > 10 && (
+                <p className="text-sm text-red-600">... and {importErrors.length - 10} more errors</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Import/Export Section */}
       <Card>

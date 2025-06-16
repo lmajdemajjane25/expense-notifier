@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export interface Service {
   id: string;
@@ -16,21 +18,32 @@ export interface Service {
   status: 'active' | 'expiring' | 'expired';
 }
 
+export interface ImportError {
+  id: string;
+  error_message: string;
+  row_data: string;
+  created_at: string;
+}
+
 interface ServiceContextType {
   services: Service[];
-  addService: (service: Omit<Service, 'id' | 'status'>) => void;
-  updateService: (id: string, service: Partial<Service>) => void;
-  deleteService: (id: string) => void;
+  addService: (service: Omit<Service, 'id' | 'status'>) => Promise<void>;
+  updateService: (id: string, service: Partial<Service>) => Promise<void>;
+  deleteService: (id: string) => Promise<void>;
   getServicesByStatus: (status: Service['status']) => Service[];
   getExpiringServices: (days: number) => Service[];
   getTotalExpenses: (period?: 'month' | 'year') => number;
   exportServicesCSV: () => void;
+  loadServices: () => Promise<void>;
+  importErrors: ImportError[];
+  clearImportErrors: () => Promise<void>;
 }
 
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 
 export const ServiceProvider = ({ children }: { children: ReactNode }) => {
   const [services, setServices] = useState<Service[]>([]);
+  const [importErrors, setImportErrors] = useState<ImportError[]>([]);
 
   // Calculate service status based on expiration date
   const calculateStatus = (expirationDate: string): Service['status'] => {
@@ -44,43 +57,148 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
     return 'active';
   };
 
-  // Update service statuses when services change
+  const loadServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedServices: Service[] = (data || []).map(service => ({
+        id: service.id,
+        name: service.name,
+        type: service.type,
+        description: service.description,
+        provider: service.provider,
+        amount: service.amount,
+        currency: service.currency,
+        frequency: service.frequency,
+        expirationDate: service.expiration_date,
+        registerDate: service.register_date,
+        paidVia: service.paid_via,
+        status: calculateStatus(service.expiration_date)
+      }));
+
+      setServices(formattedServices);
+    } catch (error) {
+      console.error('Error loading services:', error);
+      toast.error('Failed to load services');
+    }
+  };
+
+  const loadImportErrors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('import_errors')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setImportErrors(data || []);
+    } catch (error) {
+      console.error('Error loading import errors:', error);
+    }
+  };
+
   useEffect(() => {
-    setServices(prevServices =>
-      prevServices.map(service => ({
-        ...service,
-        status: calculateStatus(service.expirationDate)
-      }))
-    );
+    loadServices();
+    loadImportErrors();
   }, []);
 
-  const addService = (serviceData: Omit<Service, 'id' | 'status'>) => {
-    const newService: Service = {
-      ...serviceData,
-      id: Date.now().toString(),
-      status: calculateStatus(serviceData.expirationDate)
-    };
-    setServices(prev => [...prev, newService]);
+  const addService = async (serviceData: Omit<Service, 'id' | 'status'>) => {
+    try {
+      const { error } = await supabase
+        .from('services')
+        .insert([{
+          name: serviceData.name,
+          type: serviceData.type,
+          description: serviceData.description,
+          provider: serviceData.provider,
+          amount: serviceData.amount,
+          currency: serviceData.currency,
+          frequency: serviceData.frequency,
+          expiration_date: serviceData.expirationDate,
+          register_date: serviceData.registerDate,
+          paid_via: serviceData.paidVia,
+          status: calculateStatus(serviceData.expirationDate)
+        }]);
+
+      if (error) throw error;
+      
+      await loadServices();
+      toast.success('Service added successfully');
+    } catch (error) {
+      console.error('Error adding service:', error);
+      toast.error('Failed to add service');
+    }
   };
 
-  const updateService = (id: string, serviceData: Partial<Service>) => {
-    setServices(prev =>
-      prev.map(service =>
-        service.id === id
-          ? {
-              ...service,
-              ...serviceData,
-              status: serviceData.expirationDate
-                ? calculateStatus(serviceData.expirationDate)
-                : service.status
-            }
-          : service
-      )
-    );
+  const updateService = async (id: string, serviceData: Partial<Service>) => {
+    try {
+      const updateData: any = {};
+      if (serviceData.name) updateData.name = serviceData.name;
+      if (serviceData.type) updateData.type = serviceData.type;
+      if (serviceData.description !== undefined) updateData.description = serviceData.description;
+      if (serviceData.provider) updateData.provider = serviceData.provider;
+      if (serviceData.amount) updateData.amount = serviceData.amount;
+      if (serviceData.currency) updateData.currency = serviceData.currency;
+      if (serviceData.frequency) updateData.frequency = serviceData.frequency;
+      if (serviceData.expirationDate) {
+        updateData.expiration_date = serviceData.expirationDate;
+        updateData.status = calculateStatus(serviceData.expirationDate);
+      }
+      if (serviceData.registerDate) updateData.register_date = serviceData.registerDate;
+      if (serviceData.paidVia) updateData.paid_via = serviceData.paidVia;
+
+      const { error } = await supabase
+        .from('services')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      await loadServices();
+      toast.success('Service updated successfully');
+    } catch (error) {
+      console.error('Error updating service:', error);
+      toast.error('Failed to update service');
+    }
   };
 
-  const deleteService = (id: string) => {
-    setServices(prev => prev.filter(service => service.id !== id));
+  const deleteService = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('services')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      await loadServices();
+      toast.success('Service deleted successfully');
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast.error('Failed to delete service');
+    }
+  };
+
+  const clearImportErrors = async () => {
+    try {
+      const { error } = await supabase
+        .from('import_errors')
+        .delete()
+        .neq('id', ''); // Delete all records
+
+      if (error) throw error;
+      
+      setImportErrors([]);
+      toast.success('Import errors cleared');
+    } catch (error) {
+      console.error('Error clearing import errors:', error);
+      toast.error('Failed to clear import errors');
+    }
   };
 
   const getServicesByStatus = (status: Service['status']) => {
@@ -203,7 +321,10 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
         getServicesByStatus,
         getExpiringServices,
         getTotalExpenses,
-        exportServicesCSV
+        exportServicesCSV,
+        loadServices,
+        importErrors,
+        clearImportErrors
       }}
     >
       {children}
