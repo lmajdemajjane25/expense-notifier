@@ -4,7 +4,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://notifier.majjane.net/api' 
   : 'http://localhost:3001/api';
 
-// Create a query builder that supports chaining and returns proper Promises
+// Create a query builder that supports chaining
 class QueryBuilder {
   private table: string;
   private columns: string;
@@ -33,7 +33,7 @@ class QueryBuilder {
   }
 
   // Execute the query and return a proper Promise
-  private async execute() {
+  async execute() {
     try {
       let url = `${API_BASE_URL}/${this.table}?select=${this.columns}`;
       
@@ -85,7 +85,7 @@ class UpdateBuilder {
     return this;
   }
 
-  private async execute() {
+  async execute() {
     try {
       if (!this.whereColumn || this.whereValue === undefined) {
         throw new Error('WHERE condition is required for UPDATE');
@@ -123,7 +123,7 @@ class DeleteBuilder {
     return this;
   }
 
-  private async execute() {
+  async execute() {
     try {
       if (!this.whereColumn || this.whereValue === undefined) {
         throw new Error('WHERE condition is required for DELETE');
