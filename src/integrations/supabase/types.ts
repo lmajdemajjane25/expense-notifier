@@ -114,6 +114,30 @@ export type Database = {
           },
         ]
       }
+      import_errors: {
+        Row: {
+          created_at: string
+          error_message: string
+          id: string
+          row_data: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message: string
+          id?: string
+          row_data: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string
+          id?: string
+          row_data?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           created_at: string
@@ -275,7 +299,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      clear_import_errors: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      get_import_errors: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          user_id: string
+          error_message: string
+          row_data: string
+          created_at: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -69,15 +69,15 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
       const formattedServices: Service[] = (data || []).map(service => ({
         id: service.id,
         name: service.name,
-        type: service.type || 'unknown',
+        type: (service as any).type || 'unknown',
         description: service.description,
-        provider: service.provider || 'unknown',
+        provider: (service as any).provider || 'unknown',
         amount: service.amount,
         currency: service.currency,
         frequency: service.frequency,
         expirationDate: service.expiration_date || '',
         registerDate: service.register_date || '',
-        paidVia: service.paid_via || 'unknown',
+        paidVia: (service as any).paid_via || 'unknown',
         status: calculateStatus(service.expiration_date || '')
       }));
 
@@ -92,9 +92,7 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
     try {
       // Try to load import errors, but handle if table doesn't exist
       const { data, error } = await supabase
-        .rpc('get_import_errors')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .rpc('get_import_errors');
 
       if (error) {
         console.log('Import errors table not available:', error);
@@ -116,21 +114,24 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
 
   const addService = async (serviceData: Omit<Service, 'id' | 'status'>) => {
     try {
+      const insertData = {
+        name: serviceData.name,
+        description: serviceData.description,
+        amount: serviceData.amount,
+        currency: serviceData.currency,
+        frequency: serviceData.frequency,
+        expiration_date: serviceData.expirationDate,
+        register_date: serviceData.registerDate,
+        status: calculateStatus(serviceData.expirationDate),
+        // Use raw insert with type assertion to include custom columns
+        ...(serviceData.type && { type: serviceData.type }),
+        ...(serviceData.provider && { provider: serviceData.provider }),
+        ...(serviceData.paidVia && { paid_via: serviceData.paidVia })
+      };
+
       const { error } = await supabase
         .from('services')
-        .insert([{
-          name: serviceData.name,
-          type: serviceData.type,
-          description: serviceData.description,
-          provider: serviceData.provider,
-          amount: serviceData.amount,
-          currency: serviceData.currency,
-          frequency: serviceData.frequency,
-          expiration_date: serviceData.expirationDate,
-          register_date: serviceData.registerDate,
-          paid_via: serviceData.paidVia,
-          status: calculateStatus(serviceData.expirationDate)
-        }]);
+        .insert([insertData as any]);
 
       if (error) throw error;
       
