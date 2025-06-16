@@ -15,6 +15,7 @@ import AddService from "./pages/AddService";
 import Reports from "./pages/Reports";
 import ServiceExpiryReports from "./pages/ServiceExpiryReports";
 import Settings from "./pages/Settings";
+import Configuration from "./pages/Configuration";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -41,6 +42,7 @@ const App = () => (
                   <Route path="add-service" element={<AddService />} />
                   <Route path="reports" element={<Reports />} />
                   <Route path="service-expiry-reports" element={<ServiceExpiryReports />} />
+                  <Route path="configuration" element={<Configuration />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />

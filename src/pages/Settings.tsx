@@ -1,220 +1,321 @@
 
-import { useState, useCallback } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Settings as SettingsIcon, Plus, Edit, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Settings as SettingsIcon, Users, Plus, Edit, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  phone?: string;
+  status: string;
+  created_at: string;
+  roles: string[];
+}
 
 const Settings = () => {
-  const { t } = useLanguage();
+  const { user } = useAuth();
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [userRole, setUserRole] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [newRole, setNewRole] = useState<string>('');
 
-  const [paidViaOptions, setPaidViaOptions] = useState([
-    'PayPal',
-    'Credit Card',
-    'Bank Transfer',
-    'Stripe'
-  ]);
+  // Check current user's role
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
 
-  const [serviceTypes, setServiceTypes] = useState([
-    'Hosting',
-    'Domain',
-    'Email',
-    'Software'
-  ]);
+        if (error) {
+          console.error('Error checking user role:', error);
+          return;
+        }
 
-  const [providerNames, setProviderNames] = useState([
-    'AWS',
-    'Google',
-    'Microsoft',
-    'OVH',
-    'Contabo',
-    'DigitalOcean'
-  ]);
+        setUserRole(data?.role || 'normal');
+      } catch (error) {
+        console.error('Error checking user role:', error);
+      }
+    };
 
-  const [currencies, setCurrencies] = useState([
-    'USD',
-    'EUR',
-    'GBP'
-  ]);
+    checkUserRole();
+  }, [user]);
 
-  const [newPaidVia, setNewPaidVia] = useState('');
-  const [newServiceType, setNewServiceType] = useState('');
-  const [newProviderName, setNewProviderName] = useState('');
-  const [newCurrency, setNewCurrency] = useState('');
+  // Load all users (only for admins)
+  const loadUsers = useCallback(async () => {
+    if (!user || userRole !== 'admin') return;
 
-  const addPaidViaOption = useCallback(() => {
-    if (newPaidVia && !paidViaOptions.includes(newPaidVia)) {
-      setPaidViaOptions(prev => [...prev, newPaidVia]);
-      setNewPaidVia('');
+    setLoading(true);
+    try {
+      // Get all profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (profilesError) throw profilesError;
+
+      // Get all user roles
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      if (rolesError) throw rolesError;
+
+      // Combine profiles with roles
+      const usersWithRoles = (profiles || []).map(profile => ({
+        ...profile,
+        roles: roles?.filter(role => role.user_id === profile.id).map(role => role.role) || []
+      }));
+
+      setUsers(usersWithRoles);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      toast.error('Failed to load users');
+    } finally {
+      setLoading(false);
     }
-  }, [newPaidVia, paidViaOptions]);
+  }, [user, userRole]);
 
-  const addServiceType = useCallback(() => {
-    if (newServiceType && !serviceTypes.includes(newServiceType)) {
-      setServiceTypes(prev => [...prev, newServiceType]);
-      setNewServiceType('');
+  useEffect(() => {
+    if (userRole === 'admin') {
+      loadUsers();
     }
-  }, [newServiceType, serviceTypes]);
+  }, [userRole, loadUsers]);
 
-  const addProviderName = useCallback(() => {
-    if (newProviderName && !providerNames.includes(newProviderName)) {
-      setProviderNames(prev => [...prev, newProviderName]);
-      setNewProviderName('');
+  // Add or update user role
+  const handleRoleChange = async (userId: string, role: string) => {
+    if (userRole !== 'admin') {
+      toast.error('You do not have permission to change user roles');
+      return;
     }
-  }, [newProviderName, providerNames]);
 
-  const addCurrency = useCallback(() => {
-    if (newCurrency && !currencies.includes(newCurrency)) {
-      setCurrencies(prev => [...prev, newCurrency]);
-      setNewCurrency('');
+    try {
+      // First, remove all existing roles for this user
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId);
+
+      // Then add the new role
+      const { error } = await supabase
+        .from('user_roles')
+        .insert([{ user_id: userId, role }]);
+
+      if (error) throw error;
+
+      toast.success('User role updated successfully');
+      loadUsers();
+      setEditingUser(null);
+      setNewRole('');
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      toast.error('Failed to update user role');
     }
-  }, [newCurrency, currencies]);
+  };
 
-  const removePaidViaOption = useCallback((option: string) => {
-    setPaidViaOptions(prev => prev.filter(item => item !== option));
-  }, []);
+  // Delete user (only admins can delete)
+  const handleDeleteUser = async (userId: string) => {
+    if (userRole !== 'admin') {
+      toast.error('You do not have permission to delete users');
+      return;
+    }
 
-  const removeServiceType = useCallback((type: string) => {
-    setServiceTypes(prev => prev.filter(item => item !== type));
-  }, []);
+    if (userId === user?.id) {
+      toast.error('You cannot delete your own account');
+      return;
+    }
 
-  const removeProviderName = useCallback((provider: string) => {
-    setProviderNames(prev => prev.filter(item => item !== provider));
-  }, []);
+    try {
+      // Delete user roles first
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId);
 
-  const removeCurrency = useCallback((currency: string) => {
-    setCurrencies(prev => prev.filter(item => item !== currency));
-  }, []);
+      // Then delete profile
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
 
-  const SettingsSection = ({ 
-    title, 
-    items, 
-    newValue, 
-    setNewValue, 
-    onAdd, 
-    onRemove,
-    totalCount,
-    placeholder
-  }: {
-    title: string;
-    items: string[];
-    newValue: string;
-    setNewValue: (value: string) => void;
-    onAdd: () => void;
-    onRemove: (item: string) => void;
-    totalCount: number;
-    placeholder: string;
-  }) => (
-    <Card className="h-fit">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center text-sm">
-          <SettingsIcon className="mr-2 h-4 w-4" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Add new item */}
-        <div className="flex space-x-2">
-          <Input
-            value={newValue}
-            onChange={(e) => setNewValue(e.target.value)}
-            placeholder={placeholder}
-            onKeyPress={(e) => e.key === 'Enter' && onAdd()}
-            className="text-xs h-8"
-          />
-          <Button onClick={onAdd} size="sm" className="bg-blue-600 hover:bg-blue-700 px-2 h-8">
-            <Plus className="h-3 w-3" />
-          </Button>
+      if (error) throw error;
+
+      toast.success('User deleted successfully');
+      loadUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Failed to delete user');
+    }
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-500';
+      case 'super_user': return 'bg-orange-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  // Show access denied for non-admin users
+  if (userRole !== 'admin') {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center space-x-3">
+          <SettingsIcon className="h-5 w-5 text-gray-600" />
+          <h1 className="text-lg font-bold text-gray-900">Settings</h1>
         </div>
-
-        {/* List items */}
-        <div className="space-y-1 max-h-36 overflow-y-auto">
-          {items.map((item, index) => (
-            <div key={`${item}-${index}`} className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs">
-              <span className="font-medium">{item}</span>
-              <div className="flex space-x-1">
-                <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
-                  <Edit className="h-2 w-2 text-gray-500" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => onRemove(item)}
-                  className="h-5 w-5 p-0"
-                >
-                  <Trash2 className="h-2 w-2 text-red-500" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <p className="text-xs text-gray-500">
-          {t('settings.totalItems').replace('{count}', totalCount.toString())}
-        </p>
-      </CardContent>
-    </Card>
-  );
+        
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
+            <p className="text-gray-500">You need admin privileges to access user management settings.</p>
+            <Badge className="mt-4">{userRole}</Badge>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4 max-w-6xl">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center space-x-3">
         <SettingsIcon className="h-5 w-5 text-gray-600" />
-        <h1 className="text-lg font-bold text-gray-900">{t('settings.title')}</h1>
+        <h1 className="text-lg font-bold text-gray-900">Settings - User Management</h1>
       </div>
 
-      {/* Settings Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-        {/* Paid Via Options */}
-        <SettingsSection
-          title={t('settings.paidVia')}
-          items={paidViaOptions}
-          newValue={newPaidVia}
-          setNewValue={setNewPaidVia}
-          onAdd={addPaidViaOption}
-          onRemove={removePaidViaOption}
-          totalCount={paidViaOptions.length}
-          placeholder={t('settings.addNewPaidVia')}
-        />
-
-        {/* Service Types */}
-        <SettingsSection
-          title={t('settings.serviceTypes')}
-          items={serviceTypes}
-          newValue={newServiceType}
-          setNewValue={setNewServiceType}
-          onAdd={addServiceType}
-          onRemove={removeServiceType}
-          totalCount={serviceTypes.length}
-          placeholder={t('settings.addNewServiceType')}
-        />
-
-        {/* Provider Names */}
-        <SettingsSection
-          title="Provider Names"
-          items={providerNames}
-          newValue={newProviderName}
-          setNewValue={setNewProviderName}
-          onAdd={addProviderName}
-          onRemove={removeProviderName}
-          totalCount={providerNames.length}
-          placeholder={t('settings.addNewProvider')}
-        />
-
-        {/* Currency Section */}
-        <SettingsSection
-          title={t('settings.currency')}
-          items={currencies}
-          newValue={newCurrency}
-          setNewValue={setNewCurrency}
-          onAdd={addCurrency}
-          onRemove={removeCurrency}
-          totalCount={currencies.length}
-          placeholder={t('settings.addNewCurrency')}
-        />
-      </div>
+      {/* Users Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Users className="mr-2 h-5 w-5" />
+            User Management
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-4">Loading users...</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Full Name</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((userProfile) => (
+                  <TableRow key={userProfile.id}>
+                    <TableCell className="font-medium">{userProfile.email}</TableCell>
+                    <TableCell>{userProfile.full_name || '-'}</TableCell>
+                    <TableCell>{userProfile.phone || '-'}</TableCell>
+                    <TableCell>
+                      <Badge variant={userProfile.status === 'active' ? 'default' : 'secondary'}>
+                        {userProfile.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {editingUser === userProfile.id ? (
+                        <div className="flex space-x-2">
+                          <Select value={newRole} onValueChange={setNewRole}>
+                            <SelectTrigger className="w-32">
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="normal">Normal</SelectItem>
+                              <SelectItem value="super_user">Super User</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleRoleChange(userProfile.id, newRole)}
+                            disabled={!newRole}
+                          >
+                            Save
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setEditingUser(null);
+                              setNewRole('');
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex space-x-1">
+                          {userProfile.roles.map((role) => (
+                            <Badge 
+                              key={role} 
+                              className={`text-white ${getRoleBadgeColor(role)}`}
+                            >
+                              {role === 'super_user' ? 'Super User' : role}
+                            </Badge>
+                          ))}
+                          {userProfile.roles.length === 0 && (
+                            <Badge variant="secondary">No role assigned</Badge>
+                          )}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(userProfile.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingUser(userProfile.id);
+                            setNewRole(userProfile.roles[0] || 'normal');
+                          }}
+                          disabled={editingUser === userProfile.id}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteUser(userProfile.id)}
+                          disabled={userProfile.id === user?.id}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

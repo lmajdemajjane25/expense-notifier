@@ -171,6 +171,9 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          last_login: string | null
+          phone: string | null
+          status: string | null
           updated_at: string
         }
         Insert: {
@@ -178,6 +181,9 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          last_login?: string | null
+          phone?: string | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
@@ -185,6 +191,9 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          last_login?: string | null
+          phone?: string | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -300,6 +309,30 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           created_at: string | null
@@ -346,9 +379,20 @@ export type Database = {
           created_at: string
         }[]
       }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      is_admin_or_super_user: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "normal" | "super_user" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -463,6 +507,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["normal", "super_user", "admin"],
+    },
   },
 } as const

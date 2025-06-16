@@ -8,7 +8,8 @@ import {
   Plus, 
   BarChart3, 
   FileText, 
-  Settings 
+  Settings,
+  Cog
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -45,6 +46,12 @@ const Sidebar = () => {
       href: '/service-expiry-reports',
       icon: FileText,
       current: location.pathname === '/service-expiry-reports'
+    },
+    {
+      name: 'Configuration',
+      href: '/configuration',
+      icon: Cog,
+      current: location.pathname === '/configuration'
     },
     {
       name: t('nav.settings'),
