@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ServiceProvider } from "./contexts/ServiceContext";
+import { ConfigurationProvider } from "./contexts/ConfigurationContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
@@ -26,29 +27,31 @@ const App = () => (
     <LanguageProvider>
       <AuthProvider>
         <ServiceProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Layout />
-                  </ProtectedRoute>
-                }>
-                  <Route index element={<Dashboard />} />
-                  <Route path="services" element={<AllServices />} />
-                  <Route path="add-service" element={<AddService />} />
-                  <Route path="reports" element={<Reports />} />
-                  <Route path="service-expiry-reports" element={<ServiceExpiryReports />} />
-                  <Route path="configuration" element={<Configuration />} />
-                  <Route path="settings" element={<Settings />} />
-                </Route>
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
+          <ConfigurationProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      <Layout />
+                    </ProtectedRoute>
+                  }>
+                    <Route index element={<Dashboard />} />
+                    <Route path="services" element={<AllServices />} />
+                    <Route path="add-service" element={<AddService />} />
+                    <Route path="reports" element={<Reports />} />
+                    <Route path="service-expiry-reports" element={<ServiceExpiryReports />} />
+                    <Route path="configuration" element={<Configuration />} />
+                    <Route path="settings" element={<Settings />} />
+                  </Route>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </ConfigurationProvider>
         </ServiceProvider>
       </AuthProvider>
     </LanguageProvider>

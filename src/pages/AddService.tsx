@@ -1,7 +1,9 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useService } from '@/contexts/ServiceContext';
+import { useConfiguration } from '@/contexts/ConfigurationContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +16,13 @@ import { useToast } from '@/hooks/use-toast';
 const AddService = () => {
   const { t } = useLanguage();
   const { addService } = useService();
+  const { 
+    serviceTypes, 
+    providerNames, 
+    currencies, 
+    frequencies, 
+    paidViaOptions 
+  } = useConfiguration();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -30,12 +39,6 @@ const AddService = () => {
 
   const [expirationDate, setExpirationDate] = useState<Date | undefined>();
   const [registerDate, setRegisterDate] = useState<Date | undefined>();
-
-  const serviceTypes = ['Hosting', 'Domain', 'Email', 'Software', 'Cloud Storage', 'VPS', 'CDN', 'Security'];
-  const providers = ['AWS', 'Google', 'Microsoft', 'OVH', 'Contabo', 'DigitalOcean', 'Cloudflare', 'Other'];
-  const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
-  const frequencies = ['monthly', 'yearly', 'weekly', 'quarterly'];
-  const paymentMethods = ['PayPal', 'Credit Card', 'Bank Transfer', 'Stripe', 'Other'];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +138,7 @@ const AddService = () => {
                     <SelectValue placeholder={t('addService.selectProvider')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {providers.map(provider => (
+                    {providerNames.map(provider => (
                       <SelectItem key={provider} value={provider}>{provider}</SelectItem>
                     ))}
                   </SelectContent>
@@ -219,7 +222,7 @@ const AddService = () => {
                   <SelectValue placeholder={t('addService.paidViaPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {paymentMethods.map(method => (
+                  {paidViaOptions.map(method => (
                     <SelectItem key={method} value={method}>{method}</SelectItem>
                   ))}
                 </SelectContent>
