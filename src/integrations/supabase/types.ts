@@ -205,10 +205,13 @@ export type Database = {
           last_payment: string | null
           name: string
           notes: string | null
+          paid_via: string | null
           payment_method_id: string | null
+          provider: string | null
           provider_id: string | null
           register_date: string | null
           status: string
+          type: string | null
           updated_at: string
           user_id: string
         }
@@ -224,10 +227,13 @@ export type Database = {
           last_payment?: string | null
           name: string
           notes?: string | null
+          paid_via?: string | null
           payment_method_id?: string | null
+          provider?: string | null
           provider_id?: string | null
           register_date?: string | null
           status?: string
+          type?: string | null
           updated_at?: string
           user_id: string
         }
@@ -243,10 +249,13 @@ export type Database = {
           last_payment?: string | null
           name?: string
           notes?: string | null
+          paid_via?: string | null
           payment_method_id?: string | null
+          provider?: string | null
           provider_id?: string | null
           register_date?: string | null
           status?: string
+          type?: string | null
           updated_at?: string
           user_id?: string
         }

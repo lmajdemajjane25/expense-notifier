@@ -70,6 +70,14 @@ export const useServiceOperations = () => {
 
   const addService = async (serviceData: Omit<Service, 'id' | 'status'>) => {
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('You must be logged in to add a service');
+        return;
+      }
+
       const insertData = {
         name: serviceData.name,
         description: serviceData.description,
@@ -81,7 +89,8 @@ export const useServiceOperations = () => {
         status: calculateStatus(serviceData.expirationDate),
         type: serviceData.type,
         provider: serviceData.provider,
-        paid_via: serviceData.paidVia
+        paid_via: serviceData.paidVia,
+        user_id: user.id
       };
 
       const { error } = await supabase
