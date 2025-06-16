@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,7 @@ interface CreateUserDialogProps {
 }
 
 export const CreateUserDialog = ({ onCreateUser }: CreateUserDialogProps) => {
+  const { t } = useLanguage();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newUser, setNewUser] = useState({
     email: '',
@@ -42,66 +44,66 @@ export const CreateUserDialog = ({ onCreateUser }: CreateUserDialogProps) => {
       <DialogTrigger asChild>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
-          Add User
+          {t('userManagement.addUser')}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New User</DialogTitle>
+          <DialogTitle>{t('userManagement.createNewUser')}</DialogTitle>
           <DialogDescription>
-            Add a new user to the system. They will be assigned the "normal" role by default.
+            {t('userManagement.normalRoleDescription')}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">{t('userManagement.email')} *</Label>
             <Input
               id="email"
               type="email"
               value={newUser.email}
               onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-              placeholder="user@example.com"
+              placeholder={t('userManagement.emailPlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password *</Label>
+            <Label htmlFor="password">{t('userManagement.password')} *</Label>
             <Input
               id="password"
               type="password"
               value={newUser.password}
               onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-              placeholder="Enter password"
+              placeholder={t('userManagement.passwordPlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="full_name">Full Name</Label>
+            <Label htmlFor="full_name">{t('userManagement.fullName')}</Label>
             <Input
               id="full_name"
               value={newUser.full_name}
               onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
-              placeholder="Full name (optional)"
+              placeholder={t('userManagement.fullNamePlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
+            <Label htmlFor="phone">{t('userManagement.phone')}</Label>
             <Input
               id="phone"
               value={newUser.phone}
               onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-              placeholder="Phone number (optional)"
+              placeholder={t('userManagement.phonePlaceholder')}
             />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button 
             onClick={handleCreateUser}
             disabled={!newUser.email || !newUser.password || creating}
           >
             {creating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Create User
+            {t('userManagement.createUser')}
           </Button>
         </DialogFooter>
       </DialogContent>

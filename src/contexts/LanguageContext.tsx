@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 type Language = 'en' | 'fr' | 'ar';
@@ -51,6 +52,7 @@ const translations = {
     'nav.reports': 'Reports',
     'nav.serviceExpiryReports': 'Service Expiry Reports',
     'nav.settings': 'Settings',
+    'nav.configuration': 'Configuration',
     
     // Dashboard
     'dashboard.welcome': 'Welcome to your dashboard',
@@ -146,13 +148,48 @@ const translations = {
     
     // Settings
     'settings.title': 'Settings',
+    'settings.configuration': 'Configuration',
     'settings.paidVia': 'Paid Via',
     'settings.serviceTypes': 'Service Types',
+    'settings.providerNames': 'Provider Names',
     'settings.currency': 'Currency',
     'settings.addNewPaidVia': 'Add new paid via',
     'settings.addNewServiceType': 'Add new service types',
+    'settings.addNewProvider': 'Add new provider',
     'settings.addNewCurrency': 'Add new currency',
     'settings.totalItems': 'Total: {count} items',
+    'settings.profile': 'Profile',
+    'settings.userManagement': 'User Management',
+    'settings.profileInformation': 'Profile Information',
+    'settings.email': 'Email',
+    'settings.fullName': 'Full Name',
+    'settings.enterFullName': 'Enter your full name',
+    'settings.saveChanges': 'Save Changes',
+    'settings.saving': 'Saving...',
+    'settings.profileUpdated': 'Profile updated successfully',
+    'settings.profileUpdateError': 'Failed to update profile',
+    
+    // User Management
+    'userManagement.title': 'User Management',
+    'userManagement.addUser': 'Add User',
+    'userManagement.createNewUser': 'Create New User',
+    'userManagement.normalRoleDescription': 'They will be assigned the "normal" role by default.',
+    'userManagement.email': 'Email',
+    'userManagement.password': 'Password',
+    'userManagement.fullName': 'Full Name',
+    'userManagement.phone': 'Phone',
+    'userManagement.emailPlaceholder': 'user@example.com',
+    'userManagement.passwordPlaceholder': 'Enter password',
+    'userManagement.fullNamePlaceholder': 'Full name (optional)',
+    'userManagement.phonePlaceholder': 'Phone number (optional)',
+    'userManagement.createUser': 'Create User',
+    'userManagement.loadingUsers': 'Loading users...',
+    'userManagement.noUsersFound': 'No users found',
+    'userManagement.deleteUser': 'Delete User',
+    'userManagement.deleteConfirmation': 'Are you sure you want to delete {user}? This action cannot be undone and will permanently delete the user and all their data.',
+    'userManagement.normal': 'Normal',
+    'userManagement.admin': 'Admin',
+    'userManagement.superUser': 'Super User',
     
     // Common
     'common.loading': 'Loading...',
@@ -176,7 +213,6 @@ const translations = {
     'common.deselectAll': 'Deselect All',
     'common.noData': 'No data available',
     'common.retry': 'Retry',
-    'settings.addNewProvider': 'Add new provider',
   },
   fr: {
     // Navigation
@@ -186,6 +222,7 @@ const translations = {
     'nav.reports': 'Rapports',
     'nav.serviceExpiryReports': 'Rapports d\'expiration des services',
     'nav.settings': 'Paramètres',
+    'nav.configuration': 'Configuration',
     
     // Dashboard
     'dashboard.welcome': 'Bienvenue sur votre tableau de bord',
@@ -281,13 +318,48 @@ const translations = {
     
     // Settings
     'settings.title': 'Paramètres',
+    'settings.configuration': 'Configuration',
     'settings.paidVia': 'Payé via',
     'settings.serviceTypes': 'Types de service',
+    'settings.providerNames': 'Noms des fournisseurs',
     'settings.currency': 'Devise',
     'settings.addNewPaidVia': 'Ajouter nouveau mode de paiement',
     'settings.addNewServiceType': 'Ajouter nouveaux types de service',
+    'settings.addNewProvider': 'Ajouter nouveau fournisseur',
     'settings.addNewCurrency': 'Ajouter nouvelle devise',
     'settings.totalItems': 'Total : {count} éléments',
+    'settings.profile': 'Profil',
+    'settings.userManagement': 'Gestion des utilisateurs',
+    'settings.profileInformation': 'Informations de profil',
+    'settings.email': 'E-mail',
+    'settings.fullName': 'Nom complet',
+    'settings.enterFullName': 'Entrez votre nom complet',
+    'settings.saveChanges': 'Enregistrer les modifications',
+    'settings.saving': 'Enregistrement...',
+    'settings.profileUpdated': 'Profil mis à jour avec succès',
+    'settings.profileUpdateError': 'Échec de la mise à jour du profil',
+    
+    // User Management
+    'userManagement.title': 'Gestion des utilisateurs',
+    'userManagement.addUser': 'Ajouter un utilisateur',
+    'userManagement.createNewUser': 'Créer un nouvel utilisateur',
+    'userManagement.normalRoleDescription': 'Ils se verront attribuer le rôle "normal" par défaut.',
+    'userManagement.email': 'E-mail',
+    'userManagement.password': 'Mot de passe',
+    'userManagement.fullName': 'Nom complet',
+    'userManagement.phone': 'Téléphone',
+    'userManagement.emailPlaceholder': 'utilisateur@exemple.com',
+    'userManagement.passwordPlaceholder': 'Entrez le mot de passe',
+    'userManagement.fullNamePlaceholder': 'Nom complet (optionnel)',
+    'userManagement.phonePlaceholder': 'Numéro de téléphone (optionnel)',
+    'userManagement.createUser': 'Créer un utilisateur',
+    'userManagement.loadingUsers': 'Chargement des utilisateurs...',
+    'userManagement.noUsersFound': 'Aucun utilisateur trouvé',
+    'userManagement.deleteUser': 'Supprimer l\'utilisateur',
+    'userManagement.deleteConfirmation': 'Êtes-vous sûr de vouloir supprimer {user} ? Cette action ne peut pas être annulée et supprimera définitivement l\'utilisateur et toutes ses données.',
+    'userManagement.normal': 'Normal',
+    'userManagement.admin': 'Administrateur',
+    'userManagement.superUser': 'Super utilisateur',
     
     // Common
     'common.loading': 'Chargement...',
@@ -311,7 +383,6 @@ const translations = {
     'common.deselectAll': 'Tout désélectionner',
     'common.noData': 'Aucune donnée disponible',
     'common.retry': 'Réessayer',
-    'settings.addNewProvider': 'Ajouter nouveau fournisseur',
   },
   ar: {
     // Navigation
@@ -321,6 +392,7 @@ const translations = {
     'nav.reports': 'التقارير',
     'nav.serviceExpiryReports': 'تقارير انتهاء صلاحية الخدمة',
     'nav.settings': 'الإعدادات',
+    'nav.configuration': 'التكوين',
     
     // Dashboard
     'dashboard.welcome': 'مرحباً بك في لوحة التحكم',
@@ -394,9 +466,9 @@ const translations = {
     'reports.totalServices': 'إجمالي الخدمات',
     'reports.activeServices': 'الخدمات النشطة',
     'reports.expiringSoon': 'تنتهي قريباً',
-    'monthlyTotal': 'المجموع الشهري',
-    'serviceStatusDistribution': 'توزيع حالة الخدمة',
-    'monthlyExpensesByType': 'المصاريف الشهرية حسب النوع',
+    'reports.monthlyTotal': 'المجموع الشهري',
+    'reports.serviceStatusDistribution': 'توزيع حالة الخدمة',
+    'reports.monthlyExpensesByType': 'المصاريف الشهرية حسب النوع',
     
     // Service Expiry Reports
     'expiryReports.title': 'تقارير انتهاء صلاحية الخدمة',
@@ -416,13 +488,48 @@ const translations = {
     
     // Settings
     'settings.title': 'الإعدادات',
+    'settings.configuration': 'التكوين',
     'settings.paidVia': 'مدفوع عبر',
     'settings.serviceTypes': 'أنواع الخدمة',
+    'settings.providerNames': 'أسماء المزودين',
     'settings.currency': 'العملة',
     'settings.addNewPaidVia': 'إضافة طريقة دفع جديدة',
     'settings.addNewServiceType': 'إضافة أنواع خدمة جديدة',
+    'settings.addNewProvider': 'إضافة مزود جديد',
     'settings.addNewCurrency': 'إضافة عملة جديدة',
     'settings.totalItems': 'المجموع: {count} عنصر',
+    'settings.profile': 'الملف الشخصي',
+    'settings.userManagement': 'إدارة المستخدمين',
+    'settings.profileInformation': 'معلومات الملف الشخصي',
+    'settings.email': 'البريد الإلكتروني',
+    'settings.fullName': 'الاسم الكامل',
+    'settings.enterFullName': 'أدخل اسمك الكامل',
+    'settings.saveChanges': 'حفظ التغييرات',
+    'settings.saving': 'جارٍ الحفظ...',
+    'settings.profileUpdated': 'تم تحديث الملف الشخصي بنجاح',
+    'settings.profileUpdateError': 'فشل في تحديث الملف الشخصي',
+    
+    // User Management
+    'userManagement.title': 'إدارة المستخدمين',
+    'userManagement.addUser': 'إضافة مستخدم',
+    'userManagement.createNewUser': 'إنشاء مستخدم جديد',
+    'userManagement.normalRoleDescription': 'سيتم تعيين دور "عادي" لهم افتراضياً.',
+    'userManagement.email': 'البريد الإلكتروني',
+    'userManagement.password': 'كلمة المرور',
+    'userManagement.fullName': 'الاسم الكامل',
+    'userManagement.phone': 'الهاتف',
+    'userManagement.emailPlaceholder': 'مستخدم@مثال.com',
+    'userManagement.passwordPlaceholder': 'أدخل كلمة المرور',
+    'userManagement.fullNamePlaceholder': 'الاسم الكامل (اختياري)',
+    'userManagement.phonePlaceholder': 'رقم الهاتف (اختياري)',
+    'userManagement.createUser': 'إنشاء مستخدم',
+    'userManagement.loadingUsers': 'جارٍ تحميل المستخدمين...',
+    'userManagement.noUsersFound': 'لم يتم العثور على مستخدمين',
+    'userManagement.deleteUser': 'حذف المستخدم',
+    'userManagement.deleteConfirmation': 'هل أنت متأكد من أنك تريد حذف {user}؟ لا يمكن التراجع عن هذا الإجراء وسيؤدي إلى حذف المستخدم وجميع بياناته نهائياً.',
+    'userManagement.normal': 'عادي',
+    'userManagement.admin': 'مشرف',
+    'userManagement.superUser': 'مستخدم متقدم',
     
     // Common
     'common.loading': 'جارٍ التحميل...',
@@ -446,6 +553,5 @@ const translations = {
     'common.deselectAll': 'إلغاء تحديد الكل',
     'common.noData': 'لا توجد بيانات متاحة',
     'common.retry': 'إعادة المحاولة',
-    'settings.addNewProvider': 'إضافة مزود جديد',
   }
 };

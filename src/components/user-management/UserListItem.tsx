@@ -1,4 +1,5 @@
 
+import { useLanguage } from '@/contexts/LanguageContext';
 import { UserProfile, UserRole } from '@/types/user';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,6 +14,8 @@ interface UserListItemProps {
 }
 
 export const UserListItem = ({ user, onRoleChange, onDeleteUser }: UserListItemProps) => {
+  const { t } = useLanguage();
+
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin': return 'destructive';
@@ -44,7 +47,7 @@ export const UserListItem = ({ user, onRoleChange, onDeleteUser }: UserListItemP
           <div className="flex space-x-1">
             {user.roles.map((role) => (
               <Badge key={role} variant={getRoleBadgeVariant(role)}>
-                {role}
+                {t(`userManagement.${role}`) || role}
               </Badge>
             ))}
           </div>
@@ -59,9 +62,9 @@ export const UserListItem = ({ user, onRoleChange, onDeleteUser }: UserListItemP
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="normal">Normal</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-            <SelectItem value="super_user">Super User</SelectItem>
+            <SelectItem value="normal">{t('userManagement.normal')}</SelectItem>
+            <SelectItem value="admin">{t('userManagement.admin')}</SelectItem>
+            <SelectItem value="super_user">{t('userManagement.superUser')}</SelectItem>
           </SelectContent>
         </Select>
         <AlertDialog>
@@ -72,19 +75,18 @@ export const UserListItem = ({ user, onRoleChange, onDeleteUser }: UserListItemP
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete User</AlertDialogTitle>
+              <AlertDialogTitle>{t('userManagement.deleteUser')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete {user.full_name || user.email}? 
-                This action cannot be undone and will permanently delete the user and all their data.
+                {t('userManagement.deleteConfirmation').replace('{user}', user.full_name || user.email)}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteUser}
                 className="bg-red-600 hover:bg-red-700"
               >
-                Delete
+                {t('common.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

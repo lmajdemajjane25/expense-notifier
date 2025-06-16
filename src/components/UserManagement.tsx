@@ -1,5 +1,6 @@
 
 import { useUserManagement } from '@/hooks/useUserManagement';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { UserProfile, UserRole } from '@/types/user';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users } from 'lucide-react';
@@ -7,6 +8,7 @@ import { CreateUserDialog } from './user-management/CreateUserDialog';
 import { UserList } from './user-management/UserList';
 
 const UserManagement = () => {
+  const { t } = useLanguage();
   const { users, loading, createUser, deleteUser, updateUserRole } = useUserManagement();
 
   const handleCreateUser = async (userData: {
@@ -33,7 +35,7 @@ const UserManagement = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Users className="h-5 w-5" />
-            <CardTitle>User Management</CardTitle>
+            <CardTitle>{t('userManagement.title')}</CardTitle>
           </div>
           <CreateUserDialog onCreateUser={handleCreateUser} />
         </div>

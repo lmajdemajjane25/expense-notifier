@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ import UserManagement from '@/components/UserManagement';
 const Settings = () => {
   const { user } = useAuth();
   const { isAdminOrSuperUser } = useUserRole();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,14 +48,14 @@ const Settings = () => {
       if (profileError) throw profileError;
 
       toast({
-        title: 'Success',
-        description: 'Profile updated successfully'
+        title: t('common.success'),
+        description: t('settings.profileUpdated')
       });
     } catch (error: any) {
       console.error('Error updating profile:', error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to update profile',
+        title: t('common.error'),
+        description: error.message || t('settings.profileUpdateError'),
         variant: 'destructive'
       });
     } finally {
@@ -65,25 +67,25 @@ const Settings = () => {
     <div className="space-y-6">
       <div className="flex items-center space-x-3">
         <UserIcon className="h-8 w-8 text-blue-600" />
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('settings.title')}</h1>
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
         <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="profile">{t('settings.profile')}</TabsTrigger>
           {isAdminOrSuperUser && (
-            <TabsTrigger value="users">User Management</TabsTrigger>
+            <TabsTrigger value="users">{t('settings.userManagement')}</TabsTrigger>
           )}
         </TabsList>
 
         <TabsContent value="profile">
           <Card>
             <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
+              <CardTitle>{t('settings.profileInformation')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('settings.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -94,13 +96,13 @@ const Settings = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName">{t('settings.fullName')}</Label>
                 <Input
                   id="fullName"
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
+                  placeholder={t('settings.enterFullName')}
                 />
               </div>
 
@@ -110,7 +112,7 @@ const Settings = () => {
                 className="flex items-center space-x-2"
               >
                 <Save className="h-4 w-4" />
-                <span>{loading ? 'Saving...' : 'Save Changes'}</span>
+                <span>{loading ? t('settings.saving') : t('settings.saveChanges')}</span>
               </Button>
             </CardContent>
           </Card>

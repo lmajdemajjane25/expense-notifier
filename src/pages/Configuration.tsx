@@ -91,6 +91,12 @@ const Configuration = () => {
     setEditingItem(null);
   };
 
+  const handleEditInputChange = (value: string) => {
+    if (editingItem) {
+      setEditingItem({ ...editingItem, newValue: value });
+    }
+  };
+
   const SettingsSection = ({ 
     title, 
     items, 
@@ -140,14 +146,14 @@ const Configuration = () => {
         </div>
 
         {/* List items - increased height to show up to 15 items */}
-        <div className="space-y-1 max-h-96 overflow-y-auto">
+        <div className="space-y-1 max-h-[480px] overflow-y-auto">
           {items.map((item, index) => (
             <div key={`${item}-${index}`} className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs">
               {editingItem && editingItem.type === type && editingItem.oldValue === item ? (
                 <div className="flex items-center space-x-2 flex-1">
                   <Input
                     value={editingItem.newValue}
-                    onChange={(e) => setEditingItem({ ...editingItem, newValue: e.target.value })}
+                    onChange={(e) => handleEditInputChange(e.target.value)}
                     className="text-xs h-6"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
@@ -205,7 +211,7 @@ const Configuration = () => {
       {/* Header */}
       <div className="flex items-center space-x-3">
         <SettingsIcon className="h-5 w-5 text-gray-600" />
-        <h1 className="text-lg font-bold text-gray-900">Configuration</h1>
+        <h1 className="text-lg font-bold text-gray-900">{t('settings.configuration')}</h1>
       </div>
 
       {/* Settings Sections */}
@@ -238,7 +244,7 @@ const Configuration = () => {
 
         {/* Provider Names */}
         <SettingsSection
-          title="Provider Names"
+          title={t('settings.providerNames')}
           items={providerNames}
           newValue={newProviderName}
           setNewValue={setNewProviderName}
