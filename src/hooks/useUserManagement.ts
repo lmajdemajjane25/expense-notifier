@@ -70,20 +70,43 @@ export const useUserManagement = () => {
     phone?: string;
   }) => {
     try {
-      const { data, error } = await supabase.rpc('create_user_with_profile', {
-        email_param: userData.email,
-        password_param: userData.password,
-        full_name_param: userData.full_name || null,
-        phone_param: userData.phone || null
+      // Create user in auth
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: userData.email,
+        password: userData.password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: userData.full_name
+        }
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
 
-      const result = data as { success: boolean; error?: string };
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to create user');
+      if (!authData.user) {
+        throw new Error('Failed to create user');
       }
+
+      // Create profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          email: userData.email,
+          full_name: userData.full_name || null,
+          phone: userData.phone || null
+        });
+
+      if (profileError) throw profileError;
+
+      // Assign default role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: authData.user.id,
+          role: 'normal' as const
+        });
+
+      if (roleError) throw roleError;
 
       toast({
         title: 'Success',
@@ -128,7 +151,7 @@ export const useUserManagement = () => {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: string, oldRole?: string) => {
+  const updateUserRole = async (userId: string, newRole: 'normal' | 'admin' | 'super_user', oldRole?: string) => {
     try {
       // Remove old role if specified
       if (oldRole) {
@@ -142,7 +165,10 @@ export const useUserManagement = () => {
       // Add new role
       const { error } = await supabase
         .from('user_roles')
-        .insert({ user_id: userId, role: newRole });
+        .insert({ 
+          user_id: userId, 
+          role: newRole
+        });
 
       if (error) throw error;
 

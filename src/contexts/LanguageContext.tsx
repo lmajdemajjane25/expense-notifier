@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-type Language = 'en' | 'fr';
+type Language = 'en' | 'fr' | 'ar';
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
+  changeLanguage: (lang: Language) => void;
   t: (key: string) => string;
 }
 
@@ -12,6 +13,10 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>('en');
+
+  const changeLanguage = (lang: Language) => {
+    setLanguage(lang);
+  };
 
   const t = (key: string): string => {
     const translation = translations[language][key];
@@ -23,7 +28,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, changeLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -307,5 +312,143 @@ const translations = {
     'common.noData': 'Aucune donnée disponible',
     'common.retry': 'Réessayer',
     'settings.addNewProvider': 'Ajouter nouveau fournisseur',
+  },
+  ar: {
+    // Navigation
+    'nav.dashboard': 'لوحة التحكم',
+    'nav.allServices': 'جميع الخدمات',
+    'nav.addService': 'إضافة خدمة',
+    'nav.reports': 'التقارير',
+    'nav.serviceExpiryReports': 'تقارير انتهاء صلاحية الخدمة',
+    'nav.settings': 'الإعدادات',
+    
+    // Dashboard
+    'dashboard.welcome': 'مرحباً بك في لوحة التحكم',
+    'dashboard.subtitle': 'إدارة خدماتك ونفقاتك بكفاءة - البيانات متزامنة عبر جميع الأجهزة',
+    'dashboard.activeServices': 'الخدمات النشطة',
+    'dashboard.expiringServices': 'الخدمات المنتهية الصلاحية',
+    'dashboard.totalExpenses': 'إجمالي المصاريف',
+    'dashboard.totalExpensesYear': 'إجمالي المصاريف (هذا العام)',
+    'dashboard.expiringSoon': '0 تنتهي قريباً',
+    'dashboard.next30Days': 'الثلاثين يوماً القادمة',
+    'dashboard.thisMonth': 'هذا الشهر',
+    'dashboard.estimatedYearlyCost': 'التكلفة السنوية المقدرة',
+    'dashboard.servicesOverview': 'نظرة عامة على الخدمات',
+    'dashboard.upcomingPayments': 'المدفوعات القادمة',
+    'dashboard.noServicesToDisplay': 'لا توجد خدمات لعرضها',
+    'dashboard.servicesStatusOverview': 'نظرة عامة على حالة الخدمات',
+    'dashboard.active': 'نشط',
+    'dashboard.expiring': 'منتهي الصلاحية',
+    'dashboard.expired': 'منتهي',
+    'dashboard.recentServices': 'الخدمات الحديثة',
+    'dashboard.noServicesAdded': 'لم يتم إضافة خدمات بعد. أضف خدمتك الأولى للبدء!',
+    
+    // Services
+    'services.addService': 'إضافة خدمة',
+    'services.importExport': 'استيراد / تصدير الخدمات',
+    'services.exportServices': 'تصدير الخدمات',
+    'services.importServices': 'استيراد الخدمات',
+    'services.exportToCSV': 'تصدير إلى CSV',
+    'services.downloadAllServices': 'تحميل جميع خدماتك كملف CSV متوافق مع Google Sheets.',
+    'services.importFromCSV': 'استيراد الخدمات من ملف CSV أو TXT. استخدم التنسيق:',
+    'services.chooseFile': 'اختيار ملف',
+    'services.noFileChosen': 'لم يتم اختيار ملف',
+    'services.expectedFileFormat': 'تنسيق الملف المتوقع',
+    'services.headers': 'العناوين',
+    'services.dateFormat': 'تنسيق التاريخ',
+    'services.separator': 'الفاصل',
+    'services.example': 'مثال',
+    'services.searchFilters': 'البحث والمرشحات',
+    'services.searchServices': 'البحث عن الخدمات...',
+    'services.allStatuses': 'جميع الحالات',
+    'services.allTypes': 'جميع الأنواع',
+    'services.noServicesFound': 'لم يتم العثور على خدمات تطابق معاييرك.',
+    
+    // Add Service Form
+    'addService.title': 'إضافة خدمة',
+    'addService.serviceName': 'اسم الخدمة',
+    'addService.serviceNamePlaceholder': 'اسم الخدمة',
+    'addService.serviceType': 'نوع الخدمة',
+    'addService.serviceTypePlaceholder': 'نوع الخدمة',
+    'addService.description': 'الوصف',
+    'addService.descriptionPlaceholder': 'وصف الخدمة (اختياري)',
+    'addService.providerName': 'اسم المزود',
+    'addService.selectProvider': 'اختر المزود',
+    'addService.amountPaid': 'المبلغ المدفوع',
+    'addService.currency': 'العملة',
+    'addService.paymentFrequency': 'تكرار الدفع',
+    'addService.paymentFrequencyPlaceholder': 'تكرار الدفع',
+    'addService.expirationDate': 'تاريخ انتهاء الصلاحية',
+    'addService.registerDate': 'تاريخ التسجيل',
+    'addService.paidVia': 'مدفوع عبر',
+    'addService.paidViaPlaceholder': 'مدفوع عبر',
+    'addService.cancel': 'إلغاء',
+    'addService.save': 'حفظ',
+    'addService.success': 'تم إضافة الخدمة بنجاح!',
+    'addService.error': 'فشل في إضافة الخدمة. الرجاء المحاولة مرة أخرى.',
+    
+    // Reports
+    'reports.title': 'التقارير',
+    'reports.overview': 'نظرة عامة',
+    'reports.exportCSV': 'تصدير CSV',
+    'reports.totalServices': 'إجمالي الخدمات',
+    'reports.activeServices': 'الخدمات النشطة',
+    'reports.expiringSoon': 'تنتهي قريباً',
+    'dashboard.next30Days': 'الثلاثين يوماً القادمة',
+    'dashboard.thisMonth': 'هذا الشهر',
+    'dashboard.estimatedYearlyCost': 'التكلفة السنوية المقدرة',
+    'reports.monthlyTotal': 'المجموع الشهري',
+    'reports.serviceStatusDistribution': 'توزيع حالة الخدمة',
+    'reports.monthlyExpensesByType': 'المصاريف الشهرية حسب النوع',
+    
+    // Service Expiry Reports
+    'expiryReports.title': 'تقارير انتهاء صلاحية الخدمة',
+    'expiryReports.generateSend': 'إنشاء وإرسال تقارير انتهاء الصلاحية',
+    'expiryReports.manuallyTrigger': 'تشغيل تقارير البريد الإلكتروني يدوياً للخدمات بناءً على تواريخ انتهاء صلاحيتها.',
+    'expiryReports.recipientEmail': 'عنوان البريد الإلكتروني للمستلم',
+    'expiryReports.enterEmail': 'أدخل عنوان البريد الإلكتروني',
+    'expiryReports.expiringServices': 'الخدمات المنتهية الصلاحية',
+    'expiryReports.expiring7Days': 'تنتهي خلال < 7 أيام',
+    'expiryReports.expiring3Days': 'تنتهي خلال < 3 أيام',
+    'expiryReports.expiringToday': 'تنتهي اليوم',
+    'expiryReports.alreadyExpired': 'الخدمات المنتهية الصلاحية بالفعل',
+    'expiryReports.expired2Days': 'انتهت منذ يومين',
+    'expiryReports.expired5Days': 'انتهت منذ 5 أيام',
+    'expiryReports.expired10Days': 'انتهت منذ 10 أيام',
+    'expiryReports.expired30Days': 'انتهت منذ 30 يوماً',
+    
+    // Settings
+    'settings.title': 'الإعدادات',
+    'settings.paidVia': 'مدفوع عبر',
+    'settings.serviceTypes': 'أنواع الخدمة',
+    'settings.currency': 'العملة',
+    'settings.addNewPaidVia': 'إضافة طريقة دفع جديدة',
+    'settings.addNewServiceType': 'إضافة أنواع خدمة جديدة',
+    'settings.addNewCurrency': 'إضافة عملة جديدة',
+    'settings.totalItems': 'المجموع: {count} عنصر',
+    
+    // Common
+    'common.loading': 'جارٍ التحميل...',
+    'common.error': 'خطأ',
+    'common.success': 'نجح',
+    'common.cancel': 'إلغاء',
+    'common.save': 'حفظ',
+    'common.delete': 'حذف',
+    'common.edit': 'تحرير',
+    'common.add': 'إضافة',
+    'common.search': 'بحث',
+    'common.filter': 'تصفية',
+    'common.export': 'تصدير',
+    'common.import': 'استيراد',
+    'common.close': 'إغلاق',
+    'common.confirm': 'تأكيد',
+    'common.back': 'رجوع',
+    'common.next': 'التالي',
+    'common.previous': 'السابق',
+    'common.selectAll': 'تحديد الكل',
+    'common.deselectAll': 'إلغاء تحديد الكل',
+    'common.noData': 'لا توجد بيانات متاحة',
+    'common.retry': 'إعادة المحاولة',
+    'settings.addNewProvider': 'إضافة مزود جديد',
   }
 };

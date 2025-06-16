@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, Trash2, Edit, Loader2 } from 'lucide-react';
+import { Users, Plus, Trash2, Loader2 } from 'lucide-react';
 
 const UserManagement = () => {
   const { users, loading, createUser, deleteUser, updateUserRole } = useUserManagement();
@@ -38,7 +38,7 @@ const UserManagement = () => {
     await deleteUser(userId);
   };
 
-  const handleRoleChange = async (user: UserProfile, newRole: string) => {
+  const handleRoleChange = async (user: UserProfile, newRole: 'normal' | 'admin' | 'super_user') => {
     const currentRole = user.roles[0]; // Assuming single role for simplicity
     await updateUserRole(user.id, newRole, currentRole);
   };
@@ -46,7 +46,7 @@ const UserManagement = () => {
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin': return 'destructive';
-      case 'moderator': return 'default';
+      case 'super_user': return 'default';
       case 'normal': return 'secondary';
       default: return 'outline';
     }
@@ -161,15 +161,15 @@ const UserManagement = () => {
                 <div className="flex items-center space-x-2">
                   <Select
                     value={user.roles[0] || 'normal'}
-                    onValueChange={(value) => handleRoleChange(user, value)}
+                    onValueChange={(value: 'normal' | 'admin' | 'super_user') => handleRoleChange(user, value)}
                   >
                     <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="moderator">Moderator</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="super_user">Super User</SelectItem>
                     </SelectContent>
                   </Select>
                   <AlertDialog>
