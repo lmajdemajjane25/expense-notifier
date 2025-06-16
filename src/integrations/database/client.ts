@@ -33,42 +33,45 @@ class QueryBuilder {
   }
 
   // Return a proper promise
-  execute(): Promise<{ data: any; error: any }> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        let url = `${API_BASE_URL}/${this.table}?select=${this.columns}`;
-        
-        if (this.orderBy) {
-          url += `&order=${this.orderBy}`;
-        }
-        
-        if (this.filters.length > 0) {
-          const filter = this.filters[0]; // For simplicity, handle first filter
-          url += `&${filter.column}=${filter.value}`;
-        }
-        
-        if (this.limitCount) {
-          url += `&limit=${this.limitCount}`;
-        }
-
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        const result = {
-          data: this.limitCount === 1 ? (data[0] || null) : data,
-          error: response.ok ? null : data
-        };
-        
-        resolve(result);
-      } catch (error) {
-        resolve({ data: null, error });
+  async then(onFulfilled?: any, onRejected?: any) {
+    try {
+      let url = `${API_BASE_URL}/${this.table}?select=${this.columns}`;
+      
+      if (this.orderBy) {
+        url += `&order=${this.orderBy}`;
       }
-    });
-  }
+      
+      if (this.filters.length > 0) {
+        const filter = this.filters[0]; // For simplicity, handle first filter
+        url += `&${filter.column}=${filter.value}`;
+      }
+      
+      if (this.limitCount) {
+        url += `&limit=${this.limitCount}`;
+      }
 
-  // Make it thenable for backwards compatibility
-  then(onFulfilled?: any, onRejected?: any) {
-    return this.execute().then(onFulfilled, onRejected);
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      const result = {
+        data: this.limitCount === 1 ? (data[0] || null) : data,
+        error: response.ok ? null : data
+      };
+      
+      if (onFulfilled) {
+        return onFulfilled(result);
+      }
+      return result;
+    } catch (error) {
+      const result = { data: null, error };
+      if (onRejected) {
+        return onRejected(result);
+      }
+      if (onFulfilled) {
+        return onFulfilled(result);
+      }
+      return result;
+    }
   }
 }
 
@@ -82,38 +85,32 @@ class UpdateBuilder {
   }
 
   eq(column: string, value: any) {
+    const self = this;
     return {
-      execute: (): Promise<{ data: any; error: any }> => {
-        return new Promise(async (resolve) => {
-          try {
-            const response = await fetch(`${API_BASE_URL}/${this.table}/${value}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(this.values)
-            });
-            const data = await response.json();
-            const result = { data, error: response.ok ? null : data };
-            resolve(result);
-          } catch (error) {
-            resolve({ data: null, error });
+      async then(onFulfilled?: any, onRejected?: any) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/${self.table}/${value}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(self.values)
+          });
+          const data = await response.json();
+          const result = { data, error: response.ok ? null : data };
+          
+          if (onFulfilled) {
+            return onFulfilled(result);
           }
-        });
-      },
-      then: (onFulfilled?: any, onRejected?: any) => {
-        return new Promise(async (resolve) => {
-          try {
-            const response = await fetch(`${API_BASE_URL}/${this.table}/${value}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(this.values)
-            });
-            const data = await response.json();
-            const result = { data, error: response.ok ? null : data };
-            resolve(result);
-          } catch (error) {
-            resolve({ data: null, error });
+          return result;
+        } catch (error) {
+          const result = { data: null, error };
+          if (onRejected) {
+            return onRejected(result);
           }
-        }).then(onFulfilled, onRejected);
+          if (onFulfilled) {
+            return onFulfilled(result);
+          }
+          return result;
+        }
       }
     };
   }
@@ -127,34 +124,30 @@ class DeleteBuilder {
   }
 
   eq(column: string, value: any) {
+    const self = this;
     return {
-      execute: (): Promise<{ data: any; error: any }> => {
-        return new Promise(async (resolve) => {
-          try {
-            const response = await fetch(`${API_BASE_URL}/${this.table}/${value}`, {
-              method: 'DELETE'
-            });
-            const data = await response.json();
-            const result = { data, error: response.ok ? null : data };
-            resolve(result);
-          } catch (error) {
-            resolve({ data: null, error });
+      async then(onFulfilled?: any, onRejected?: any) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/${self.table}/${value}`, {
+            method: 'DELETE'
+          });
+          const data = await response.json();
+          const result = { data, error: response.ok ? null : data };
+          
+          if (onFulfilled) {
+            return onFulfilled(result);
           }
-        });
-      },
-      then: (onFulfilled?: any, onRejected?: any) => {
-        return new Promise(async (resolve) => {
-          try {
-            const response = await fetch(`${API_BASE_URL}/${this.table}/${value}`, {
-              method: 'DELETE'
-            });
-            const data = await response.json();
-            const result = { data, error: response.ok ? null : data };
-            resolve(result);
-          } catch (error) {
-            resolve({ data: null, error });
+          return result;
+        } catch (error) {
+          const result = { data: null, error };
+          if (onRejected) {
+            return onRejected(result);
           }
-        }).then(onFulfilled, onRejected);
+          if (onFulfilled) {
+            return onFulfilled(result);
+          }
+          return result;
+        }
       }
     };
   }
