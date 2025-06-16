@@ -15,6 +15,10 @@ interface ConfigurationContextType {
   removeServiceType: (type: string) => void;
   removeProviderName: (provider: string) => void;
   removeCurrency: (currency: string) => void;
+  updatePaidViaOption: (oldValue: string, newValue: string) => void;
+  updateServiceType: (oldValue: string, newValue: string) => void;
+  updateProviderName: (oldValue: string, newValue: string) => void;
+  updateCurrency: (oldValue: string, newValue: string) => void;
 }
 
 const ConfigurationContext = createContext<ConfigurationContextType | undefined>(undefined);
@@ -118,6 +122,22 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
     setCurrencies(prev => prev.filter(item => item !== currency));
   }, []);
 
+  const updatePaidViaOption = useCallback((oldValue: string, newValue: string) => {
+    setPaidViaOptions(prev => prev.map(item => item === oldValue ? newValue : item));
+  }, []);
+
+  const updateServiceType = useCallback((oldValue: string, newValue: string) => {
+    setServiceTypes(prev => prev.map(item => item === oldValue ? newValue : item));
+  }, []);
+
+  const updateProviderName = useCallback((oldValue: string, newValue: string) => {
+    setProviderNames(prev => prev.map(item => item === oldValue ? newValue : item));
+  }, []);
+
+  const updateCurrency = useCallback((oldValue: string, newValue: string) => {
+    setCurrencies(prev => prev.map(item => item === oldValue ? newValue : item));
+  }, []);
+
   return (
     <ConfigurationContext.Provider
       value={{
@@ -133,7 +153,11 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
         removePaidViaOption,
         removeServiceType,
         removeProviderName,
-        removeCurrency
+        removeCurrency,
+        updatePaidViaOption,
+        updateServiceType,
+        updateProviderName,
+        updateCurrency
       }}
     >
       {children}
