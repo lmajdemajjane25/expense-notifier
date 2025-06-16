@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { database } from '@/integrations/database/client';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Service, ImportError } from '@/types/service';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,11 +29,10 @@ export const useServiceOperations = () => {
     }
 
     try {
-      const { data, error } = await database
+      const { data, error } = await supabase
         .from('services')
         .select('*')
-        .order('created_at', { ascending: false })
-        .execute();
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
@@ -66,7 +65,7 @@ export const useServiceOperations = () => {
     }
 
     try {
-      const { data, error } = await database.rpc('get_import_errors');
+      const { data, error } = await supabase.rpc('get_import_errors');
 
       if (error) {
         console.log('Import errors table not available:', error);
@@ -103,7 +102,7 @@ export const useServiceOperations = () => {
         user_id: user.id
       };
 
-      const { error } = await database
+      const { error } = await supabase
         .from('services')
         .insert(insertData);
 
@@ -139,11 +138,10 @@ export const useServiceOperations = () => {
       if (serviceData.registerDate) updateData.register_date = serviceData.registerDate;
       if (serviceData.paidVia) updateData.paid_via = serviceData.paidVia;
 
-      const { error } = await database
+      const { error } = await supabase
         .from('services')
         .update(updateData)
-        .eq('id', id)
-        .execute();
+        .eq('id', id);
 
       if (error) throw error;
       
@@ -162,11 +160,10 @@ export const useServiceOperations = () => {
     }
 
     try {
-      const { error } = await database
+      const { error } = await supabase
         .from('services')
         .delete()
-        .eq('id', id)
-        .execute();
+        .eq('id', id);
 
       if (error) throw error;
       
@@ -185,7 +182,7 @@ export const useServiceOperations = () => {
     }
 
     try {
-      const { error } = await database.rpc('clear_import_errors');
+      const { error } = await supabase.rpc('clear_import_errors');
 
       if (error) {
         console.log('Import errors clearing not available:', error);
