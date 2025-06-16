@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileDown, Upload, Search, Filter, AlertCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 const AllServices = () => {
   const { t } = useLanguage();
@@ -383,7 +384,7 @@ const AllServices = () => {
                         {service.frequency}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(service.expirationDate).toLocaleDateString()}
+                        {format(new Date(service.expirationDate), 'dd/MM/yy')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

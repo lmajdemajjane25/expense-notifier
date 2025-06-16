@@ -156,7 +156,7 @@ const Dashboard = () => {
               </div>
               <div>
                 <h3 className="font-medium mb-3">
-                  Services for {selectedDate ? format(selectedDate, 'MMM dd, yyyy') : 'No date selected'}
+                  Services for {selectedDate ? format(selectedDate, 'dd/MM/yy') : 'No date selected'}
                 </h3>
                 {servicesForSelectedDate.length === 0 ? (
                   <p className="text-gray-500 text-sm">No services for this date</p>
@@ -183,7 +183,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
-                          {format(new Date(service.expirationDate), 'yyyy-MM-dd') === format(selectedDate!, 'yyyy-MM-dd') 
+                          {format(new Date(service.expirationDate), 'dd/MM/yy') === format(selectedDate!, 'dd/MM/yy') 
                             ? 'Expires today' 
                             : 'Registered today'}
                         </p>
@@ -219,7 +219,7 @@ const Dashboard = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-sm">${service.amount}</p>
-                      <p className="text-xs text-gray-500">{new Date(service.expirationDate).toLocaleDateString()}</p>
+                      <p className="text-xs text-gray-500">{format(new Date(service.expirationDate), 'dd/MM/yy')}</p>
                     </div>
                   </div>
                 ))}

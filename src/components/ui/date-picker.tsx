@@ -29,13 +29,13 @@ export function DatePicker({
   className,
 }: DatePickerProps) {
   const [inputValue, setInputValue] = React.useState(
-    date ? format(date, "yyyy-MM-dd") : ""
+    date ? format(date, "dd/MM/yy") : ""
   );
   const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (date) {
-      setInputValue(format(date, "yyyy-MM-dd"));
+      setInputValue(format(date, "dd/MM/yy"));
     } else {
       setInputValue("");
     }
@@ -45,10 +45,21 @@ export function DatePicker({
     const value = e.target.value;
     setInputValue(value);
     
-    // Try to parse the date
-    const parsedDate = new Date(value);
-    if (!isNaN(parsedDate.getTime()) && value.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      onDateChange(parsedDate);
+    // Try to parse the date in DD/MM/YY format
+    const dateParts = value.split('/');
+    if (dateParts.length === 3) {
+      const day = parseInt(dateParts[0], 10);
+      const month = parseInt(dateParts[1], 10) - 1; // Month is 0-indexed
+      const year = parseInt(dateParts[2], 10);
+      const fullYear = year < 50 ? 2000 + year : 1900 + year; // Assume years 00-49 are 2000s, 50-99 are 1900s
+      
+      const parsedDate = new Date(fullYear, month, day);
+      if (!isNaN(parsedDate.getTime()) && 
+          parsedDate.getDate() === day && 
+          parsedDate.getMonth() === month && 
+          parsedDate.getFullYear() === fullYear) {
+        onDateChange(parsedDate);
+      }
     }
   };
 
@@ -61,12 +72,12 @@ export function DatePicker({
     <div className={cn("relative", className)}>
       <div className="flex">
         <Input
-          type="date"
+          type="text"
           value={inputValue}
           onChange={handleInputChange}
           disabled={disabled}
           className="rounded-r-none border-r-0"
-          placeholder="YYYY-MM-DD"
+          placeholder="DD/MM/YY"
         />
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
