@@ -394,12 +394,9 @@ const translations = {
     'reports.totalServices': 'إجمالي الخدمات',
     'reports.activeServices': 'الخدمات النشطة',
     'reports.expiringSoon': 'تنتهي قريباً',
-    'dashboard.next30Days': 'الثلاثين يوماً القادمة',
-    'dashboard.thisMonth': 'هذا الشهر',
-    'dashboard.estimatedYearlyCost': 'التكلفة السنوية المقدرة',
-    'reports.monthlyTotal': 'المجموع الشهري',
-    'reports.serviceStatusDistribution': 'توزيع حالة الخدمة',
-    'reports.monthlyExpensesByType': 'المصاريف الشهرية حسب النوع',
+    'monthlyTotal': 'المجموع الشهري',
+    'serviceStatusDistribution': 'توزيع حالة الخدمة',
+    'monthlyExpensesByType': 'المصاريف الشهرية حسب النوع',
     
     // Service Expiry Reports
     'expiryReports.title': 'تقارير انتهاء صلاحية الخدمة',

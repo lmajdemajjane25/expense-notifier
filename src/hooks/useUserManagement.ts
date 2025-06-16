@@ -162,12 +162,12 @@ export const useUserManagement = () => {
           .eq('role', oldRole);
       }
 
-      // Add new role
+      // Add new role with proper type casting
       const { error } = await supabase
         .from('user_roles')
         .insert({ 
           user_id: userId, 
-          role: newRole
+          role: newRole as 'normal' | 'admin' | 'super_user'
         });
 
       if (error) throw error;
