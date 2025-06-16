@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js'
 
 // For now, we'll keep the Supabase client structure but point to your local API
@@ -9,10 +10,30 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 // Custom database client that mimics Supabase structure
 export const database = {
   from: (table: string) => ({
-    select: async (columns = '*') => {
-      const response = await fetch(`${API_BASE_URL}/${table}?select=${columns}`);
-      const data = await response.json();
-      return { data, error: response.ok ? null : data };
+    select: (columns = '*') => {
+      const promise = fetch(`${API_BASE_URL}/${table}?select=${columns}`)
+        .then(response => response.json())
+        .then(data => ({ data, error: null }))
+        .catch(error => ({ data: null, error }));
+
+      // Add order method to the promise
+      (promise as any).order = (column: string, options: any = {}) => {
+        const orderParam = options.ascending === false ? `${column}.desc` : `${column}.asc`;
+        return fetch(`${API_BASE_URL}/${table}?select=${columns}&order=${orderParam}`)
+          .then(response => response.json())
+          .then(data => ({ data, error: null }))
+          .catch(error => ({ data: null, error }));
+      };
+
+      // Add single method
+      (promise as any).single = () => {
+        return fetch(`${API_BASE_URL}/${table}?select=${columns}&limit=1`)
+          .then(response => response.json())
+          .then(data => ({ data: data[0] || null, error: null }))
+          .catch(error => ({ data: null, error }));
+      };
+
+      return promise;
     },
     insert: async (values: any) => {
       const response = await fetch(`${API_BASE_URL}/${table}`, {
@@ -23,7 +44,7 @@ export const database = {
       const data = await response.json();
       return { data, error: response.ok ? null : data };
     },
-    update: async (values: any) => ({
+    update: (values: any) => ({
       eq: async (column: string, value: any) => {
         const response = await fetch(`${API_BASE_URL}/${table}/${value}`, {
           method: 'PUT',

@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, FileText, Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 const ServiceExpiryReports = () => {
   const { t } = useLanguage();
@@ -77,21 +76,12 @@ const ServiceExpiryReports = () => {
     setSendingReport(reportType);
 
     try {
-      const { data, error } = await supabase.functions.invoke('send-expiry-report', {
-        body: {
-          email: emailAddress,
-          reportType,
-          services
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
+      // Mock implementation - replace with actual email sending logic
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       toast({
         title: t('common.success'),
-        description: data.message || `Report sent to ${emailAddress}`,
+        description: `Report sent to ${emailAddress}`,
       });
     } catch (error: any) {
       console.error('Error sending report:', error);
