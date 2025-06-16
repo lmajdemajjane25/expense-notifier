@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Badge } from '@/components/ui/badge';
 import { Users, Plus, Trash2, Loader2 } from 'lucide-react';
 
+type UserRole = 'normal' | 'admin' | 'super_user';
+
 const UserManagement = () => {
   const { users, loading, createUser, deleteUser, updateUserRole } = useUserManagement();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -38,7 +40,7 @@ const UserManagement = () => {
     await deleteUser(userId);
   };
 
-  const handleRoleChange = async (user: UserProfile, newRole: 'normal' | 'admin' | 'super_user') => {
+  const handleRoleChange = async (user: UserProfile, newRole: UserRole) => {
     const currentRole = user.roles[0]; // Assuming single role for simplicity
     await updateUserRole(user.id, newRole, currentRole);
   };
@@ -161,7 +163,7 @@ const UserManagement = () => {
                 <div className="flex items-center space-x-2">
                   <Select
                     value={user.roles[0] || 'normal'}
-                    onValueChange={(value: 'normal' | 'admin' | 'super_user') => handleRoleChange(user, value)}
+                    onValueChange={(value: UserRole) => handleRoleChange(user, value)}
                   >
                     <SelectTrigger className="w-32">
                       <SelectValue />

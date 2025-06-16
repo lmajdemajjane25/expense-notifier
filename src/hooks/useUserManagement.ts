@@ -13,6 +13,8 @@ export interface UserProfile {
   roles: string[];
 }
 
+type UserRole = 'normal' | 'admin' | 'super_user';
+
 export const useUserManagement = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -103,7 +105,7 @@ export const useUserManagement = () => {
         .from('user_roles')
         .insert({
           user_id: authData.user.id,
-          role: 'normal' as const
+          role: 'normal' as UserRole
         });
 
       if (roleError) throw roleError;
@@ -151,7 +153,7 @@ export const useUserManagement = () => {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: 'normal' | 'admin' | 'super_user', oldRole?: string) => {
+  const updateUserRole = async (userId: string, newRole: UserRole, oldRole?: string) => {
     try {
       // Remove old role if specified
       if (oldRole) {
@@ -162,12 +164,12 @@ export const useUserManagement = () => {
           .eq('role', oldRole);
       }
 
-      // Add new role with proper type casting
+      // Add new role with proper typing
       const { error } = await supabase
         .from('user_roles')
         .insert({ 
           user_id: userId, 
-          role: newRole as 'normal' | 'admin' | 'super_user'
+          role: newRole
         });
 
       if (error) throw error;
