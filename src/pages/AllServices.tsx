@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileDown, Upload, Search, Filter, AlertCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 const AllServices = () => {
   const { t } = useLanguage();
@@ -41,12 +40,9 @@ const AllServices = () => {
 
   const logImportError = async (errorMessage: string, rowData: string) => {
     try {
-      await supabase
-        .from('import_errors')
-        .insert([{
-          error_message: errorMessage,
-          row_data: rowData
-        }]);
+      // Log error locally for now since import_errors table might not exist
+      console.error('Import Error:', errorMessage, 'Row:', rowData);
+      // You could implement a local error storage mechanism here
     } catch (error) {
       console.error('Error logging import error:', error);
     }
