@@ -32,36 +32,43 @@ class QueryBuilder {
     return this;
   }
 
-  async then(resolve: any, reject?: any) {
-    try {
-      let url = `${API_BASE_URL}/${this.table}?select=${this.columns}`;
-      
-      if (this.orderBy) {
-        url += `&order=${this.orderBy}`;
-      }
-      
-      if (this.filters.length > 0) {
-        const filter = this.filters[0]; // For simplicity, handle first filter
-        url += `&${filter.column}=${filter.value}`;
-      }
-      
-      if (this.limitCount) {
-        url += `&limit=${this.limitCount}`;
-      }
+  // Return a proper promise
+  execute(): Promise<{ data: any; error: any }> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let url = `${API_BASE_URL}/${this.table}?select=${this.columns}`;
+        
+        if (this.orderBy) {
+          url += `&order=${this.orderBy}`;
+        }
+        
+        if (this.filters.length > 0) {
+          const filter = this.filters[0]; // For simplicity, handle first filter
+          url += `&${filter.column}=${filter.value}`;
+        }
+        
+        if (this.limitCount) {
+          url += `&limit=${this.limitCount}`;
+        }
 
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      const result = {
-        data: this.limitCount === 1 ? (data[0] || null) : data,
-        error: response.ok ? null : data
-      };
-      
-      return resolve(result);
-    } catch (error) {
-      const result = { data: null, error };
-      return reject ? reject(result) : resolve(result);
-    }
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        const result = {
+          data: this.limitCount === 1 ? (data[0] || null) : data,
+          error: response.ok ? null : data
+        };
+        
+        resolve(result);
+      } catch (error) {
+        resolve({ data: null, error });
+      }
+    });
+  }
+
+  // Make it thenable for backwards compatibility
+  then(onFulfilled?: any, onRejected?: any) {
+    return this.execute().then(onFulfilled, onRejected);
   }
 }
 
@@ -76,20 +83,37 @@ class UpdateBuilder {
 
   eq(column: string, value: any) {
     return {
-      then: async (resolve: any, reject?: any) => {
-        try {
-          const response = await fetch(`${API_BASE_URL}/${this.table}/${value}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(this.values)
-          });
-          const data = await response.json();
-          const result = { data, error: response.ok ? null : data };
-          return resolve(result);
-        } catch (error) {
-          const result = { data: null, error };
-          return reject ? reject(result) : resolve(result);
-        }
+      execute: (): Promise<{ data: any; error: any }> => {
+        return new Promise(async (resolve) => {
+          try {
+            const response = await fetch(`${API_BASE_URL}/${this.table}/${value}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.values)
+            });
+            const data = await response.json();
+            const result = { data, error: response.ok ? null : data };
+            resolve(result);
+          } catch (error) {
+            resolve({ data: null, error });
+          }
+        });
+      },
+      then: (onFulfilled?: any, onRejected?: any) => {
+        return new Promise(async (resolve) => {
+          try {
+            const response = await fetch(`${API_BASE_URL}/${this.table}/${value}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.values)
+            });
+            const data = await response.json();
+            const result = { data, error: response.ok ? null : data };
+            resolve(result);
+          } catch (error) {
+            resolve({ data: null, error });
+          }
+        }).then(onFulfilled, onRejected);
       }
     };
   }
@@ -104,18 +128,33 @@ class DeleteBuilder {
 
   eq(column: string, value: any) {
     return {
-      then: async (resolve: any, reject?: any) => {
-        try {
-          const response = await fetch(`${API_BASE_URL}/${this.table}/${value}`, {
-            method: 'DELETE'
-          });
-          const data = await response.json();
-          const result = { data, error: response.ok ? null : data };
-          return resolve(result);
-        } catch (error) {
-          const result = { data: null, error };
-          return reject ? reject(result) : resolve(result);
-        }
+      execute: (): Promise<{ data: any; error: any }> => {
+        return new Promise(async (resolve) => {
+          try {
+            const response = await fetch(`${API_BASE_URL}/${this.table}/${value}`, {
+              method: 'DELETE'
+            });
+            const data = await response.json();
+            const result = { data, error: response.ok ? null : data };
+            resolve(result);
+          } catch (error) {
+            resolve({ data: null, error });
+          }
+        });
+      },
+      then: (onFulfilled?: any, onRejected?: any) => {
+        return new Promise(async (resolve) => {
+          try {
+            const response = await fetch(`${API_BASE_URL}/${this.table}/${value}`, {
+              method: 'DELETE'
+            });
+            const data = await response.json();
+            const result = { data, error: response.ok ? null : data };
+            resolve(result);
+          } catch (error) {
+            resolve({ data: null, error });
+          }
+        }).then(onFulfilled, onRejected);
       }
     };
   }
