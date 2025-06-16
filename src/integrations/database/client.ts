@@ -1,15 +1,17 @@
 
+// Direct Supabase client that works with the actual Supabase database
+import { createClient } from '@supabase/supabase-js';
 
-// Custom database client that mimics Supabase structure
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://notifier.majjane.net/api' 
-  : 'http://localhost:3001/api';
+const supabaseUrl = 'https://rqxrwvhgdnxzumbrrplg.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxeHJ3dmhnZG54enVtYnJycGxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNTUzNjEsImV4cCI6MjA2MzkzMTM2MX0.XtJxIccunytStPetqTIHg692m5bJZ3rTwVt5sMfMZwI';
 
-// Create a query builder that supports chaining
+const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+
+// Create a query builder that supports chaining and works with Supabase
 class QueryBuilder {
   private table: string;
   private columns: string;
-  private orderBy?: string;
+  private orderBy?: { column: string; ascending: boolean };
   private filters: Array<{column: string, value: any}> = [];
   private limitCount?: number;
 
@@ -19,7 +21,7 @@ class QueryBuilder {
   }
 
   order(column: string, options: any = {}) {
-    this.orderBy = options.ascending === false ? `${column}.desc` : `${column}.asc`;
+    this.orderBy = { column, ascending: options.ascending !== false };
     return this;
   }
 
@@ -36,27 +38,28 @@ class QueryBuilder {
   // Execute the query and return a proper Promise
   async execute() {
     try {
-      let url = `${API_BASE_URL}/${this.table}?select=${this.columns}`;
+      let query = supabaseClient.from(this.table).select(this.columns);
       
+      // Apply filters
+      for (const filter of this.filters) {
+        query = query.eq(filter.column, filter.value);
+      }
+      
+      // Apply ordering
       if (this.orderBy) {
-        url += `&order=${this.orderBy}`;
+        query = query.order(this.orderBy.column, { ascending: this.orderBy.ascending });
       }
       
-      if (this.filters.length > 0) {
-        const filter = this.filters[0]; // For simplicity, handle first filter
-        url += `&${filter.column}=${filter.value}`;
-      }
-      
+      // Apply limit
       if (this.limitCount) {
-        url += `&limit=${this.limitCount}`;
+        query = query.limit(this.limitCount);
       }
 
-      const response = await fetch(url);
-      const data = await response.json();
+      const { data, error } = await query;
       
       return {
-        data: this.limitCount === 1 ? (data[0] || null) : data,
-        error: response.ok ? null : data
+        data: this.limitCount === 1 ? (data?.[0] || null) : data,
+        error
       };
     } catch (error) {
       return { data: null, error };
@@ -87,13 +90,13 @@ class UpdateBuilder {
         throw new Error('WHERE condition is required for UPDATE');
       }
 
-      const response = await fetch(`${API_BASE_URL}/${this.table}/${this.whereValue}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.values)
-      });
-      const data = await response.json();
-      return { data, error: response.ok ? null : data };
+      const { data, error } = await supabaseClient
+        .from(this.table)
+        .update(this.values)
+        .eq(this.whereColumn, this.whereValue)
+        .select();
+
+      return { data, error };
     } catch (error) {
       return { data: null, error };
     }
@@ -121,11 +124,13 @@ class DeleteBuilder {
         throw new Error('WHERE condition is required for DELETE');
       }
 
-      const response = await fetch(`${API_BASE_URL}/${this.table}/${this.whereValue}`, {
-        method: 'DELETE'
-      });
-      const data = await response.json();
-      return { data, error: response.ok ? null : data };
+      const { data, error } = await supabaseClient
+        .from(this.table)
+        .delete()
+        .eq(this.whereColumn, this.whereValue)
+        .select();
+
+      return { data, error };
     } catch (error) {
       return { data: null, error };
     }
@@ -138,13 +143,11 @@ export const database = {
       return new QueryBuilder(table, columns);
     },
     insert: async (values: any) => {
-      const response = await fetch(`${API_BASE_URL}/${table}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values)
-      });
-      const data = await response.json();
-      return { data, error: response.ok ? null : data };
+      const { data, error } = await supabaseClient
+        .from(table)
+        .insert(values)
+        .select();
+      return { data, error };
     },
     update: (values: any) => {
       return new UpdateBuilder(table, values);
@@ -154,13 +157,7 @@ export const database = {
     }
   }),
   rpc: async (functionName: string, params: any = {}) => {
-    const response = await fetch(`${API_BASE_URL}/rpc/${functionName}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params)
-    });
-    const data = await response.json();
-    return { data, error: response.ok ? null : data };
+    const { data, error } = await supabaseClient.rpc(functionName, params);
+    return { data, error };
   }
 };
-
