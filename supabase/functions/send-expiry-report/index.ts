@@ -14,26 +14,35 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    )
+    const { emailAddress, services, reportTitle } = await req.json()
 
-    // Get services expiring in the next 30 days
-    const { data: services, error: servicesError } = await supabaseClient
-      .from('services')
-      .select('*')
-      .gte('expiration_date', new Date().toISOString().split('T')[0])
-      .lte('expiration_date', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+    // If services are provided in the request, use them; otherwise fetch from database
+    let servicesToReport = services
+    
+    if (!servicesToReport || servicesToReport.length === 0) {
+      // Create Supabase client
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      )
 
-    if (servicesError) {
-      throw new Error(`Failed to fetch services: ${servicesError.message}`)
+      // Get services expiring in the next 30 days
+      const { data: fetchedServices, error: servicesError } = await supabaseClient
+        .from('services')
+        .select('*')
+        .gte('expiration_date', new Date().toISOString().split('T')[0])
+        .lte('expiration_date', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+
+      if (servicesError) {
+        throw new Error(`Failed to fetch services: ${servicesError.message}`)
+      }
+
+      servicesToReport = fetchedServices || []
     }
 
-    if (!services || services.length === 0) {
+    if (!servicesToReport || servicesToReport.length === 0) {
       return new Response(
-        JSON.stringify({ message: 'No services expiring in the next 30 days' }),
+        JSON.stringify({ message: 'No services found for the report' }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200
@@ -49,6 +58,9 @@ serve(async (req) => {
       throw new Error('Postmark configuration missing. Please set POSTMARK_API_TOKEN and POSTMARK_FROM_EMAIL in Edge Function secrets.')
     }
 
+    // Use provided email address or fallback to from email
+    const recipientEmail = emailAddress || postmarkFromEmail
+
     // Generate HTML email content
     const htmlContent = `
       <html>
@@ -62,22 +74,34 @@ serve(async (req) => {
             .service-details { margin-top: 8px; color: #666; }
             .expiring-soon { border-left: 4px solid #f39c12; }
             .expired { border-left: 4px solid #e74c3c; }
+            .active { border-left: 4px solid #27ae60; }
             .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; color: #666; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1 style="color: #333; margin: 0;">Service Expiry Report</h1>
-              <p style="color: #666; margin: 10px 0 0 0;">Services expiring in the next 30 days</p>
+              <h1 style="color: #333; margin: 0;">${reportTitle || 'Service Expiry Report'}</h1>
+              <p style="color: #666; margin: 10px 0 0 0;">Generated on ${new Date().toLocaleDateString()}</p>
             </div>
             
-            ${services.map(service => {
-              const expirationDate = new Date(service.expiration_date)
+            ${servicesToReport.map(service => {
+              const expirationDate = new Date(service.expiration_date || service.expirationDate)
               const today = new Date()
               const daysUntilExpiry = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
               const isExpired = daysUntilExpiry < 0
-              const cssClass = isExpired ? 'expired' : 'expiring-soon'
+              const isExpiring = daysUntilExpiry >= 0 && daysUntilExpiry <= 30
+              
+              let cssClass = 'active'
+              let statusText = 'Active'
+              
+              if (isExpired) {
+                cssClass = 'expired'
+                statusText = `Expired ${Math.abs(daysUntilExpiry)} days ago`
+              } else if (isExpiring) {
+                cssClass = 'expiring-soon'
+                statusText = daysUntilExpiry === 0 ? 'Expires today' : `Expires in ${daysUntilExpiry} days`
+              }
               
               return `
                 <div class="service-item ${cssClass}">
@@ -87,7 +111,7 @@ serve(async (req) => {
                     <strong>Amount:</strong> ${service.amount} ${service.currency}<br>
                     <strong>Frequency:</strong> ${service.frequency}<br>
                     <strong>Expiration Date:</strong> ${expirationDate.toLocaleDateString()}<br>
-                    <strong>Status:</strong> ${isExpired ? 'Expired' : `Expires in ${daysUntilExpiry} days`}
+                    <strong>Status:</strong> ${statusText}
                   </div>
                 </div>
               `
@@ -112,11 +136,11 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         From: postmarkFromEmail,
-        To: postmarkFromEmail, // Send to the same email for now
-        Subject: `Service Expiry Report - ${services.length} services expiring soon`,
+        To: recipientEmail,
+        Subject: `${reportTitle || 'Service Expiry Report'} - ${servicesToReport.length} services`,
         HtmlBody: htmlContent,
-        TextBody: `Service Expiry Report\n\n${services.map(s => 
-          `${s.name} (${s.provider}) - Expires: ${new Date(s.expiration_date).toLocaleDateString()}`
+        TextBody: `${reportTitle || 'Service Expiry Report'}\n\n${servicesToReport.map(s => 
+          `${s.name} (${s.provider}) - Expires: ${new Date(s.expiration_date || s.expirationDate).toLocaleDateString()}`
         ).join('\n')}`
       })
     })
@@ -131,8 +155,9 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         message: 'Email sent successfully',
-        servicesCount: services.length,
-        messageId: postmarkResult.MessageID
+        servicesCount: servicesToReport.length,
+        messageId: postmarkResult.MessageID,
+        recipientEmail
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

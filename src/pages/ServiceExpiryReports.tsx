@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, FileText, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const ServiceExpiryReports = () => {
   const { t } = useLanguage();
@@ -38,30 +39,39 @@ const ServiceExpiryReports = () => {
 
     // Get services based on report type
     let services;
+    let reportTitle;
     switch (reportType) {
       case 'expiring7':
         services = expiring7Days;
+        reportTitle = 'Services Expiring in 7 Days';
         break;
       case 'expiring3':
         services = expiring3Days;
+        reportTitle = 'Services Expiring in 3 Days';
         break;
       case 'expiringToday':
         services = expiringToday;
+        reportTitle = 'Services Expiring Today';
         break;
       case 'expired2':
         services = expired2Days;
+        reportTitle = 'Services Expired in Last 2 Days';
         break;
       case 'expired5':
         services = expired5Days;
+        reportTitle = 'Services Expired in Last 5 Days';
         break;
       case 'expired10':
         services = expired10Days;
+        reportTitle = 'Services Expired in Last 10 Days';
         break;
       case 'expired30':
         services = expired30Days;
+        reportTitle = 'Services Expired in Last 30 Days';
         break;
       default:
         services = [];
+        reportTitle = 'Service Report';
     }
 
     if (services.length === 0) {
@@ -76,18 +86,38 @@ const ServiceExpiryReports = () => {
     setSendingReport(reportType);
 
     try {
-      // Mock implementation - replace with actual email sending logic
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call the edge function to send the expiry report
+      const { data, error } = await supabase.functions.invoke('send-expiry-report', {
+        body: {
+          emailAddress,
+          services: services.map(service => ({
+            name: service.name,
+            provider: service.provider,
+            amount: service.amount,
+            currency: service.currency,
+            frequency: service.frequency,
+            expiration_date: service.expirationDate,
+            status: service.status
+          })),
+          reportTitle
+        }
+      });
 
+      if (error) {
+        console.error('Error sending report:', error);
+        throw new Error(error.message || 'Failed to send report');
+      }
+
+      console.log('Report sent successfully:', data);
       toast({
         title: t('common.success'),
-        description: `Report sent to ${emailAddress}`,
+        description: `Report "${reportTitle}" sent successfully to ${emailAddress}`,
       });
     } catch (error: any) {
       console.error('Error sending report:', error);
       toast({
         title: t('common.error'),
-        description: error.message || 'Failed to send report',
+        description: error.message || 'Failed to send report. Please check your email configuration.',
         variant: 'destructive'
       });
     } finally {
