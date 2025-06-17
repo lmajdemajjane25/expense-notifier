@@ -8,6 +8,7 @@ export const useConfigurationLogic = () => {
     serviceTypes,
     providerNames,
     currencies,
+    loading,
     addPaidViaOption,
     addServiceType,
     addProviderName,
@@ -28,30 +29,30 @@ export const useConfigurationLogic = () => {
   const [newCurrency, setNewCurrency] = useState('');
   const [editingItem, setEditingItem] = useState<{type: string, oldValue: string, newValue: string} | null>(null);
 
-  const handleAddPaidVia = () => {
+  const handleAddPaidVia = async () => {
     if (newPaidVia.trim()) {
-      addPaidViaOption(newPaidVia.trim());
+      await addPaidViaOption(newPaidVia.trim());
       setNewPaidVia('');
     }
   };
 
-  const handleAddServiceType = () => {
+  const handleAddServiceType = async () => {
     if (newServiceType.trim()) {
-      addServiceType(newServiceType.trim());
+      await addServiceType(newServiceType.trim());
       setNewServiceType('');
     }
   };
 
-  const handleAddProviderName = () => {
+  const handleAddProviderName = async () => {
     if (newProviderName.trim()) {
-      addProviderName(newProviderName.trim());
+      await addProviderName(newProviderName.trim());
       setNewProviderName('');
     }
   };
 
-  const handleAddCurrency = () => {
+  const handleAddCurrency = async () => {
     if (newCurrency.trim()) {
-      addCurrency(newCurrency.trim());
+      await addCurrency(newCurrency.trim());
       setNewCurrency('');
     }
   };
@@ -64,20 +65,20 @@ export const useConfigurationLogic = () => {
     setEditingItem(null);
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (editingItem && editingItem.newValue.trim() && editingItem.newValue !== editingItem.oldValue) {
       switch (editingItem.type) {
         case 'paidVia':
-          updatePaidViaOption(editingItem.oldValue, editingItem.newValue.trim());
+          await updatePaidViaOption(editingItem.oldValue, editingItem.newValue.trim());
           break;
         case 'serviceType':
-          updateServiceType(editingItem.oldValue, editingItem.newValue.trim());
+          await updateServiceType(editingItem.oldValue, editingItem.newValue.trim());
           break;
         case 'provider':
-          updateProviderName(editingItem.oldValue, editingItem.newValue.trim());
+          await updateProviderName(editingItem.oldValue, editingItem.newValue.trim());
           break;
         case 'currency':
-          updateCurrency(editingItem.oldValue, editingItem.newValue.trim());
+          await updateCurrency(editingItem.oldValue, editingItem.newValue.trim());
           break;
       }
     }
@@ -96,6 +97,7 @@ export const useConfigurationLogic = () => {
     serviceTypes,
     providerNames,
     currencies,
+    loading,
     
     // Form states
     newPaidVia,

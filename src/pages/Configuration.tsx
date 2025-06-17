@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useConfigurationLogic } from '@/hooks/useConfigurationLogic';
 import { ConfigurationHeader } from '@/components/configuration/ConfigurationHeader';
 import { SettingsSection } from '@/components/configuration/SettingsSection';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Configuration = () => {
   const { t } = useLanguage();
@@ -11,6 +12,7 @@ const Configuration = () => {
     serviceTypes,
     providerNames,
     currencies,
+    loading,
     newPaidVia,
     setNewPaidVia,
     newServiceType,
@@ -33,6 +35,19 @@ const Configuration = () => {
     saveEdit,
     handleEditInputChange
   } = useConfigurationLogic();
+
+  if (loading) {
+    return (
+      <div className="space-y-4 max-w-6xl">
+        <ConfigurationHeader />
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-64 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 max-w-6xl">

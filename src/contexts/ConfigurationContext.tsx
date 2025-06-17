@@ -1,5 +1,7 @@
 
-import React, { createContext, useContext, ReactNode, useState, useCallback } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useCallback, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface ConfigurationContextType {
   paidViaOptions: string[];
@@ -7,6 +9,7 @@ interface ConfigurationContextType {
   providerNames: string[];
   currencies: string[];
   frequencies: string[];
+  loading: boolean;
   addPaidViaOption: (option: string) => void;
   addServiceType: (type: string) => void;
   addProviderName: (provider: string) => void;
@@ -24,119 +27,186 @@ interface ConfigurationContextType {
 const ConfigurationContext = createContext<ConfigurationContextType | undefined>(undefined);
 
 export const ConfigurationProvider = ({ children }: { children: ReactNode }) => {
-  const [paidViaOptions, setPaidViaOptions] = useState([
-    'PayPal',
-    'Credit Card', 
-    'Bank Transfer',
-    'Stripe',
-    'Debit Card',
-    'Wire Transfer',
-    'Apple Pay',
-    'Google Pay',
-    'Cryptocurrency',
-    'Check'
-  ]);
-
-  const [serviceTypes, setServiceTypes] = useState([
-    'Hosting',
-    'Domain',
-    'Email',
-    'Software',
-    'Cloud Storage',
-    'VPS',
-    'CDN',
-    'Security',
-    'Analytics',
-    'Marketing',
-    'Communication',
-    'Database'
-  ]);
-
-  const [providerNames, setProviderNames] = useState([
-    'AWS',
-    'Google',
-    'Microsoft',
-    'OVH',
-    'Contabo',
-    'DigitalOcean',
-    'Cloudflare',
-    'GoDaddy',
-    'Namecheap',
-    'Vultr',
-    'Linode',
-    'Hetzner'
-  ]);
-
-  const [currencies, setCurrencies] = useState([
-    'USD',
-    'EUR',
-    'GBP',
-    'CAD',
-    'AUD',
-    'JPY',
-    'CHF',
-    'SEK',
-    'NOK',
-    'DKK'
-  ]);
+  const { toast } = useToast();
+  
+  const [paidViaOptions, setPaidViaOptions] = useState<string[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<string[]>([]);
+  const [providerNames, setProviderNames] = useState<string[]>([]);
+  const [currencies, setCurrencies] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const frequencies = ['weekly', 'monthly', 'quarterly', 'yearly'];
 
-  const addPaidViaOption = useCallback((option: string) => {
+  // Load configuration from database
+  const loadConfiguration = async () => {
+    try {
+      setLoading(true);
+      console.log('Loading configuration from database...');
+      
+      const { data: settings, error } = await supabase
+        .from('user_settings')
+        .select('setting_type, setting_value')
+        .in('setting_type', ['paid_via_options', 'service_types', 'provider_names', 'currencies']);
+
+      if (error) {
+        console.error('Error loading configuration:', error);
+        throw error;
+      }
+
+      console.log('Configuration data loaded:', settings);
+
+      // Parse and set the configuration data
+      const paidViaData = settings?.find(s => s.setting_type === 'paid_via_options')?.setting_value;
+      const serviceTypesData = settings?.find(s => s.setting_type === 'service_types')?.setting_value;
+      const providerNamesData = settings?.find(s => s.setting_type === 'provider_names')?.setting_value;
+      const currenciesData = settings?.find(s => s.setting_type === 'currencies')?.setting_value;
+
+      setPaidViaOptions(paidViaData ? JSON.parse(paidViaData) : [
+        'PayPal', 'Credit Card', 'Bank Transfer', 'Stripe', 'Debit Card', 
+        'Wire Transfer', 'Apple Pay', 'Google Pay', 'Cryptocurrency', 'Check'
+      ]);
+      
+      setServiceTypes(serviceTypesData ? JSON.parse(serviceTypesData) : [
+        'Hosting', 'Domain', 'Email', 'Software', 'Cloud Storage', 'VPS', 
+        'CDN', 'Security', 'Analytics', 'Marketing', 'Communication', 'Database'
+      ]);
+      
+      setProviderNames(providerNamesData ? JSON.parse(providerNamesData) : [
+        'AWS', 'Google', 'Microsoft', 'OVH', 'Contabo', 'DigitalOcean', 
+        'Cloudflare', 'GoDaddy', 'Namecheap', 'Vultr', 'Linode', 'Hetzner'
+      ]);
+      
+      setCurrencies(currenciesData ? JSON.parse(currenciesData) : [
+        'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'SEK', 'NOK', 'DKK'
+      ]);
+
+    } catch (error: any) {
+      console.error('Error loading configuration:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load configuration settings',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Save configuration to database
+  const saveConfiguration = async (type: string, data: string[]) => {
+    try {
+      console.log('Saving configuration:', type, data);
+      
+      const { error } = await supabase
+        .from('user_settings')
+        .upsert({
+          setting_type: type,
+          setting_value: JSON.stringify(data)
+        }, {
+          onConflict: 'user_id,setting_type'
+        });
+
+      if (error) {
+        console.error('Error saving configuration:', error);
+        throw error;
+      }
+
+      console.log('Configuration saved successfully');
+
+    } catch (error: any) {
+      console.error('Error saving configuration:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save configuration settings',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // Load configuration on mount
+  useEffect(() => {
+    loadConfiguration();
+  }, []);
+
+  const addPaidViaOption = useCallback(async (option: string) => {
     if (option && !paidViaOptions.includes(option)) {
-      setPaidViaOptions(prev => [...prev, option]);
+      const newOptions = [...paidViaOptions, option];
+      setPaidViaOptions(newOptions);
+      await saveConfiguration('paid_via_options', newOptions);
     }
   }, [paidViaOptions]);
 
-  const addServiceType = useCallback((type: string) => {
+  const addServiceType = useCallback(async (type: string) => {
     if (type && !serviceTypes.includes(type)) {
-      setServiceTypes(prev => [...prev, type]);
+      const newTypes = [...serviceTypes, type];
+      setServiceTypes(newTypes);
+      await saveConfiguration('service_types', newTypes);
     }
   }, [serviceTypes]);
 
-  const addProviderName = useCallback((provider: string) => {
+  const addProviderName = useCallback(async (provider: string) => {
     if (provider && !providerNames.includes(provider)) {
-      setProviderNames(prev => [...prev, provider]);
+      const newProviders = [...providerNames, provider];
+      setProviderNames(newProviders);
+      await saveConfiguration('provider_names', newProviders);
     }
   }, [providerNames]);
 
-  const addCurrency = useCallback((currency: string) => {
+  const addCurrency = useCallback(async (currency: string) => {
     if (currency && !currencies.includes(currency)) {
-      setCurrencies(prev => [...prev, currency]);
+      const newCurrencies = [...currencies, currency];
+      setCurrencies(newCurrencies);
+      await saveConfiguration('currencies', newCurrencies);
     }
   }, [currencies]);
 
-  const removePaidViaOption = useCallback((option: string) => {
-    setPaidViaOptions(prev => prev.filter(item => item !== option));
-  }, []);
+  const removePaidViaOption = useCallback(async (option: string) => {
+    const newOptions = paidViaOptions.filter(item => item !== option);
+    setPaidViaOptions(newOptions);
+    await saveConfiguration('paid_via_options', newOptions);
+  }, [paidViaOptions]);
 
-  const removeServiceType = useCallback((type: string) => {
-    setServiceTypes(prev => prev.filter(item => item !== type));
-  }, []);
+  const removeServiceType = useCallback(async (type: string) => {
+    const newTypes = serviceTypes.filter(item => item !== type);
+    setServiceTypes(newTypes);
+    await saveConfiguration('service_types', newTypes);
+  }, [serviceTypes]);
 
-  const removeProviderName = useCallback((provider: string) => {
-    setProviderNames(prev => prev.filter(item => item !== provider));
-  }, []);
+  const removeProviderName = useCallback(async (provider: string) => {
+    const newProviders = providerNames.filter(item => item !== provider);
+    setProviderNames(newProviders);
+    await saveConfiguration('provider_names', newProviders);
+  }, [providerNames]);
 
-  const removeCurrency = useCallback((currency: string) => {
-    setCurrencies(prev => prev.filter(item => item !== currency));
-  }, []);
+  const removeCurrency = useCallback(async (currency: string) => {
+    const newCurrencies = currencies.filter(item => item !== currency);
+    setCurrencies(newCurrencies);
+    await saveConfiguration('currencies', newCurrencies);
+  }, [currencies]);
 
-  const updatePaidViaOption = useCallback((oldValue: string, newValue: string) => {
-    setPaidViaOptions(prev => prev.map(item => item === oldValue ? newValue : item));
-  }, []);
+  const updatePaidViaOption = useCallback(async (oldValue: string, newValue: string) => {
+    const newOptions = paidViaOptions.map(item => item === oldValue ? newValue : item);
+    setPaidViaOptions(newOptions);
+    await saveConfiguration('paid_via_options', newOptions);
+  }, [paidViaOptions]);
 
-  const updateServiceType = useCallback((oldValue: string, newValue: string) => {
-    setServiceTypes(prev => prev.map(item => item === oldValue ? newValue : item));
-  }, []);
+  const updateServiceType = useCallback(async (oldValue: string, newValue: string) => {
+    const newTypes = serviceTypes.map(item => item === oldValue ? newValue : item);
+    setServiceTypes(newTypes);
+    await saveConfiguration('service_types', newTypes);
+  }, [serviceTypes]);
 
-  const updateProviderName = useCallback((oldValue: string, newValue: string) => {
-    setProviderNames(prev => prev.map(item => item === oldValue ? newValue : item));
-  }, []);
+  const updateProviderName = useCallback(async (oldValue: string, newValue: string) => {
+    const newProviders = providerNames.map(item => item === oldValue ? newValue : item);
+    setProviderNames(newProviders);
+    await saveConfiguration('provider_names', newProviders);
+  }, [providerNames]);
 
-  const updateCurrency = useCallback((oldValue: string, newValue: string) => {
-    setCurrencies(prev => prev.map(item => item === oldValue ? newValue : item));
-  }, []);
+  const updateCurrency = useCallback(async (oldValue: string, newValue: string) => {
+    const newCurrencies = currencies.map(item => item === oldValue ? newValue : item);
+    setCurrencies(newCurrencies);
+    await saveConfiguration('currencies', newCurrencies);
+  }, [currencies]);
 
   return (
     <ConfigurationContext.Provider
@@ -146,6 +216,7 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
         providerNames,
         currencies,
         frequencies,
+        loading,
         addPaidViaOption,
         addServiceType,
         addProviderName,
