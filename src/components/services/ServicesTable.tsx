@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -123,15 +122,18 @@ export const ServicesTable = ({
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <Checkbox
-                          checked={isAllSelected}
-                          onCheckedChange={handleSelectAll}
-                          ref={(ref) => {
-                            if (ref) {
-                              ref.indeterminate = isPartiallySelected;
-                            }
-                          }}
-                        />
+                        <div className="relative">
+                          <Checkbox
+                            checked={isAllSelected}
+                            onCheckedChange={handleSelectAll}
+                            className={isPartiallySelected ? "data-[state=checked]:bg-blue-600" : ""}
+                          />
+                          {isPartiallySelected && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="w-2 h-0.5 bg-blue-600"></div>
+                            </div>
+                          )}
+                        </div>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Service
