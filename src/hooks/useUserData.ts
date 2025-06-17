@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { database } from '@/integrations/database/client';
+import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/user';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,8 +12,10 @@ export const useUserData = () => {
   const loadUsers = async () => {
     setLoading(true);
     try {
+      console.log('Loading users...');
+      
       // Get all profiles with their roles
-      const { data: profiles, error: profilesError } = await database
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
           id,
@@ -22,19 +24,26 @@ export const useUserData = () => {
           phone,
           status,
           created_at
-        `)
-        .execute();
+        `);
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('Error loading profiles:', profilesError);
+        throw profilesError;
+      }
+
+      console.log('Loaded profiles:', profiles);
 
       // Get roles for each user
       const usersWithRoles = await Promise.all(
         (profiles || []).map(async (profile) => {
-          const { data: roles } = await database
+          const { data: roles, error: rolesError } = await supabase
             .from('user_roles')
             .select('role')
-            .eq('user_id', profile.id)
-            .execute();
+            .eq('user_id', profile.id);
+
+          if (rolesError) {
+            console.error('Error loading roles for user:', profile.id, rolesError);
+          }
 
           return {
             ...profile,
@@ -43,12 +52,13 @@ export const useUserData = () => {
         })
       );
 
+      console.log('Users with roles:', usersWithRoles);
       setUsers(usersWithRoles);
     } catch (error: any) {
       console.error('Error loading users:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load users',
+        description: `Failed to load users: ${error.message}`,
         variant: 'destructive'
       });
     } finally {

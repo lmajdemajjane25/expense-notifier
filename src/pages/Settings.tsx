@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { UserIcon, Save, Users } from 'lucide-react';
 import UserManagement from '@/components/UserManagement';
+import { ImportErrorsDisplay } from '@/components/ImportErrorsDisplay';
 
 const Settings = () => {
   const { user } = useAuth();
@@ -32,12 +33,17 @@ const Settings = () => {
 
     setLoading(true);
     try {
+      console.log('Updating profile for user:', user.id);
+      
       // Update user metadata
       const { error: authError } = await supabase.auth.updateUser({
         data: { full_name: fullName }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('Auth update error:', authError);
+        throw authError;
+      }
 
       // Update profile table
       const { error: profileError } = await supabase
@@ -45,7 +51,12 @@ const Settings = () => {
         .update({ full_name: fullName })
         .eq('id', user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        throw profileError;
+      }
+
+      console.log('Profile updated successfully');
 
       toast({
         title: t('common.success'),
@@ -69,6 +80,8 @@ const Settings = () => {
         <UserIcon className="h-8 w-8 text-blue-600" />
         <h1 className="text-2xl font-bold text-gray-900">{t('settings.title')}</h1>
       </div>
+
+      <ImportErrorsDisplay />
 
       <Tabs defaultValue="profile" className="w-full">
         <TabsList>

@@ -8,6 +8,8 @@ export const useUserCreation = () => {
 
   const createUser = async (userData: CreateUserData) => {
     try {
+      console.log('Creating user with data:', userData);
+      
       // Create user in auth
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: userData.email,
@@ -18,11 +20,16 @@ export const useUserCreation = () => {
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
 
       if (!authData.user) {
-        throw new Error('Failed to create user');
+        throw new Error('Failed to create user - no user returned');
       }
+
+      console.log('User created in auth:', authData.user.id);
 
       // Create profile
       const { error: profileError } = await supabase
@@ -34,7 +41,12 @@ export const useUserCreation = () => {
           phone: userData.phone || null
         });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile error:', profileError);
+        throw profileError;
+      }
+
+      console.log('Profile created successfully');
 
       // Assign default role
       const { error: roleError } = await supabase
@@ -44,7 +56,12 @@ export const useUserCreation = () => {
           role: 'normal' as UserRole
         });
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error('Role error:', roleError);
+        throw roleError;
+      }
+
+      console.log('Role assigned successfully');
 
       toast({
         title: 'Success',
