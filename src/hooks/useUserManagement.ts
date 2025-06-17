@@ -4,6 +4,7 @@ import { useUserData } from './useUserData';
 import { useUserCreation } from './useUserCreation';
 import { useUserDeletion } from './useUserDeletion';
 import { useUserRoles } from './useUserRoles';
+import { CreateUserData, UserRole } from '@/types/user';
 
 export const useUserManagement = () => {
   const { users, loading, loadUsers } = useUserData();
@@ -11,10 +12,10 @@ export const useUserManagement = () => {
   const { deleteUser } = useUserDeletion();
   const { updateUserRole } = useUserRoles();
 
-  const handleCreateUser = async (userData: any) => {
+  const handleCreateUser = async (userData: CreateUserData) => {
     const success = await createUser(userData);
     if (success) {
-      await loadUsers();
+      await loadUsers(); // Reload users after creation
     }
     return success;
   };
@@ -22,15 +23,15 @@ export const useUserManagement = () => {
   const handleDeleteUser = async (userId: string) => {
     const success = await deleteUser(userId);
     if (success) {
-      await loadUsers();
+      await loadUsers(); // Reload users after deletion
     }
     return success;
   };
 
-  const handleUpdateUserRole = async (userId: string, newRole: any, oldRole?: any) => {
+  const handleUpdateUserRole = async (userId: string, newRole: UserRole, oldRole?: UserRole) => {
     const success = await updateUserRole(userId, newRole, oldRole);
     if (success) {
-      await loadUsers();
+      await loadUsers(); // Reload users after role update
     }
     return success;
   };

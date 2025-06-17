@@ -9,7 +9,20 @@ export const useUserDeletion = () => {
     try {
       console.log('Deleting user:', userId);
       
-      // First delete from profiles table (this should cascade to user_roles via foreign key)
+      // First delete roles (this should cascade properly with foreign keys)
+      const { error: rolesError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId);
+      
+      if (rolesError) {
+        console.error('Roles deletion error:', rolesError);
+        // Continue anyway as this might not be critical
+      } else {
+        console.log('User roles deleted successfully');
+      }
+
+      // Then delete from profiles table
       const { error: profileError } = await supabase
         .from('profiles')
         .delete()
@@ -22,7 +35,7 @@ export const useUserDeletion = () => {
 
       console.log('Profile deleted successfully');
 
-      // Then delete from auth.users using admin API
+      // Finally delete from auth.users using admin API
       const { error: authError } = await supabase.auth.admin.deleteUser(userId);
       
       if (authError) {

@@ -10,22 +10,19 @@ export const useUserRoles = () => {
     try {
       console.log('Updating user role:', { userId, newRole, oldRole });
       
-      // Remove old role if specified
-      if (oldRole) {
-        const { error: deleteError } = await supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', userId)
-          .eq('role', oldRole);
+      // First remove all existing roles for this user
+      const { error: deleteError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId);
 
-        if (deleteError) {
-          console.error('Error removing old role:', deleteError);
-          throw deleteError;
-        }
-        console.log('Old role removed successfully');
+      if (deleteError) {
+        console.error('Error removing existing roles:', deleteError);
+        throw deleteError;
       }
+      console.log('Existing roles removed successfully');
 
-      // Add new role
+      // Then add the new role
       const { error: insertError } = await supabase
         .from('user_roles')
         .insert({ 

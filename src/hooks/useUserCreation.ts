@@ -10,7 +10,7 @@ export const useUserCreation = () => {
     try {
       console.log('Creating user with data:', userData);
       
-      // Create user in auth
+      // Create user in auth using the admin API
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: userData.email,
         password: userData.password,
@@ -43,6 +43,8 @@ export const useUserCreation = () => {
 
       if (profileError) {
         console.error('Profile error:', profileError);
+        // Clean up auth user if profile creation fails
+        await supabase.auth.admin.deleteUser(authData.user.id);
         throw profileError;
       }
 
@@ -58,10 +60,11 @@ export const useUserCreation = () => {
 
       if (roleError) {
         console.error('Role error:', roleError);
-        throw roleError;
+        // Don't fail completely if role assignment fails, but log it
+        console.warn('Failed to assign default role, but user was created');
+      } else {
+        console.log('Role assigned successfully');
       }
-
-      console.log('Role assigned successfully');
 
       toast({
         title: 'Success',
