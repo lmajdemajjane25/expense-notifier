@@ -7,6 +7,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Helper function to format date as DD/MM/YYYY
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -82,7 +91,7 @@ serve(async (req) => {
           <div class="container">
             <div class="header">
               <h1 style="color: #333; margin: 0;">${reportTitle || 'Service Expiry Report'}</h1>
-              <p style="color: #666; margin: 10px 0 0 0;">Generated on ${new Date().toLocaleDateString()}</p>
+              <p style="color: #666; margin: 10px 0 0 0;">Generated on ${formatDate(new Date().toISOString())}</p>
             </div>
             
             ${servicesToReport.map(service => {
@@ -110,7 +119,7 @@ serve(async (req) => {
                     <strong>Provider:</strong> ${service.provider}<br>
                     <strong>Amount:</strong> ${service.amount} ${service.currency}<br>
                     <strong>Frequency:</strong> ${service.frequency}<br>
-                    <strong>Expiration Date:</strong> ${expirationDate.toLocaleDateString()}<br>
+                    <strong>Expiration Date:</strong> ${formatDate(service.expiration_date || service.expirationDate)}<br>
                     <strong>Status:</strong> ${statusText}
                   </div>
                 </div>
@@ -140,7 +149,7 @@ serve(async (req) => {
         Subject: `${reportTitle || 'Service Expiry Report'} - ${servicesToReport.length} services`,
         HtmlBody: htmlContent,
         TextBody: `${reportTitle || 'Service Expiry Report'}\n\n${servicesToReport.map(s => 
-          `${s.name} (${s.provider}) - Expires: ${new Date(s.expiration_date || s.expirationDate).toLocaleDateString()}`
+          `${s.name} (${s.provider}) - Expires: ${formatDate(s.expiration_date || s.expirationDate)}`
         ).join('\n')}`
       })
     })
