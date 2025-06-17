@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Edit, Trash2 } from 'lucide-react';
 import { Service } from '@/types/service';
+import { useConfiguration } from '@/contexts/ConfigurationContext';
 
 interface ServiceActionsProps {
   service: Service;
@@ -18,6 +19,14 @@ interface ServiceActionsProps {
 }
 
 export const ServiceActions = ({ service, onUpdate, onDelete }: ServiceActionsProps) => {
+  const { 
+    serviceTypes, 
+    providerNames, 
+    currencies, 
+    frequencies, 
+    paidViaOptions 
+  } = useConfiguration();
+  
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState({
     name: service.name,
@@ -71,6 +80,32 @@ export const ServiceActions = ({ service, onUpdate, onDelete }: ServiceActionsPr
                 onChange={(e) => setEditData({...editData, description: e.target.value})}
               />
             </div>
+            <div>
+              <Label htmlFor="type">Service Type</Label>
+              <Select value={editData.type} onValueChange={(value) => setEditData({...editData, type: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {serviceTypes.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="provider">Provider</Label>
+              <Select value={editData.provider} onValueChange={(value) => setEditData({...editData, provider: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {providerNames.map(provider => (
+                    <SelectItem key={provider} value={provider}>{provider}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="amount">Amount</Label>
@@ -88,9 +123,9 @@ export const ServiceActions = ({ service, onUpdate, onDelete }: ServiceActionsPr
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="EUR">EUR</SelectItem>
-                    <SelectItem value="GBP">GBP</SelectItem>
+                    {currencies.map(currency => (
+                      <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -102,10 +137,22 @@ export const ServiceActions = ({ service, onUpdate, onDelete }: ServiceActionsPr
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="quarterly">Quarterly</SelectItem>
-                  <SelectItem value="yearly">Yearly</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
+                  {frequencies.map(frequency => (
+                    <SelectItem key={frequency} value={frequency}>{frequency}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="paidVia">Paid Via</Label>
+              <Select value={editData.paidVia} onValueChange={(value) => setEditData({...editData, paidVia: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {paidViaOptions.map(method => (
+                    <SelectItem key={method} value={method}>{method}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
