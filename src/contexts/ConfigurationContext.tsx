@@ -97,18 +97,52 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
     try {
       console.log('Saving configuration:', type, data);
       
-      const { error } = await supabase
-        .from('user_settings')
-        .upsert({
-          setting_type: type,
-          setting_value: JSON.stringify(data)
-        }, {
-          onConflict: 'user_id,setting_type'
-        });
+      // First, try to get the current user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
 
-      if (error) {
-        console.error('Error saving configuration:', error);
-        throw error;
+      // Check if setting already exists
+      const { data: existingSetting, error: selectError } = await supabase
+        .from('user_settings')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('setting_type', type)
+        .single();
+
+      if (selectError && selectError.code !== 'PGRST116') {
+        // PGRST116 is "not found" error, which is expected for new settings
+        console.error('Error checking existing setting:', selectError);
+        throw selectError;
+      }
+
+      let result;
+      if (existingSetting) {
+        // Update existing setting
+        result = await supabase
+          .from('user_settings')
+          .update({
+            setting_value: JSON.stringify(data),
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id)
+          .eq('setting_type', type);
+      } else {
+        // Insert new setting
+        result = await supabase
+          .from('user_settings')
+          .insert({
+            user_id: user.id,
+            setting_type: type,
+            setting_value: JSON.stringify(data)
+          });
+      }
+
+      if (result.error) {
+        console.error('Error saving configuration:', result.error);
+        throw result.error;
       }
 
       console.log('Configuration saved successfully');
@@ -120,6 +154,7 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
         description: 'Failed to save configuration settings',
         variant: 'destructive'
       });
+      throw error;
     }
   };
 
