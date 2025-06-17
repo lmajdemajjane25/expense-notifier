@@ -18,6 +18,7 @@ interface ServiceContextType {
   loadServices: () => Promise<void>;
   importErrors: ImportError[];
   clearImportErrors: () => Promise<void>;
+  logImportError: (errorMessage: string, rowData: string) => Promise<void>;
 }
 
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
@@ -33,7 +34,8 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
     updateService,
     renewService,
     deleteService,
-    clearImportErrors
+    clearImportErrors,
+    logImportError
   } = useServiceOperations();
 
   const {
@@ -68,7 +70,8 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
         exportServicesCSV,
         loadServices,
         importErrors,
-        clearImportErrors
+        clearImportErrors,
+        logImportError
       }}
     >
       {children}

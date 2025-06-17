@@ -7,6 +7,7 @@ import { BulkActionsBar } from './BulkActionsBar';
 import { ServiceTableHeader } from './ServiceTableHeader';
 import { ServiceTableRow } from './ServiceTableRow';
 import { ServiceConfirmationDialogs } from './ServiceConfirmationDialogs';
+import { ServicesPagination } from './ServicesPagination';
 
 interface ServicesTableProps {
   services: Service[];
@@ -26,6 +27,8 @@ export const ServicesTable = ({
   const [serviceToRenew, setServiceToRenew] = useState<Service | null>(null);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const handleRenewClick = (service: Service) => {
     setServiceToRenew(service);
@@ -55,7 +58,7 @@ export const ServicesTable = ({
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedServices(services.map(service => service.id));
+      setSelectedServices(paginatedServices.map(service => service.id));
     } else {
       setSelectedServices([]);
     }
@@ -77,8 +80,26 @@ export const ServicesTable = ({
     setBulkDeleteConfirmOpen(false);
   };
 
-  const isAllSelected = services.length > 0 && selectedServices.length === services.length;
-  const isPartiallySelected = selectedServices.length > 0 && selectedServices.length < services.length;
+  // Pagination logic
+  const totalPages = itemsPerPage === -1 ? 1 : Math.ceil(services.length / itemsPerPage);
+  const startIndex = itemsPerPage === -1 ? 0 : (currentPage - 1) * itemsPerPage;
+  const endIndex = itemsPerPage === -1 ? services.length : startIndex + itemsPerPage;
+  const paginatedServices = services.slice(startIndex, endIndex);
+
+  const isAllSelected = paginatedServices.length > 0 && selectedServices.length === paginatedServices.length && 
+    paginatedServices.every(service => selectedServices.includes(service.id));
+  const isPartiallySelected = selectedServices.length > 0 && selectedServices.length < paginatedServices.length;
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setSelectedServices([]); // Clear selections when changing pages
+  };
+
+  const handleItemsPerPageChange = (items: number) => {
+    setItemsPerPage(items);
+    setCurrentPage(1);
+    setSelectedServices([]); // Clear selections when changing page size
+  };
 
   return (
     <>
@@ -102,7 +123,7 @@ export const ServicesTable = ({
                     onSelectAll={handleSelectAll}
                   />
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {services.map((service) => (
+                    {paginatedServices.map((service) => (
                       <ServiceTableRow
                         key={service.id}
                         service={service}
@@ -116,6 +137,15 @@ export const ServicesTable = ({
                   </tbody>
                 </table>
               </div>
+              
+              <ServicesPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                totalItems={services.length}
+                onPageChange={handlePageChange}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
             </>
           )}
         </CardContent>

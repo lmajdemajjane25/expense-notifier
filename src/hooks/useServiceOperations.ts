@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -78,6 +77,32 @@ export const useServiceOperations = () => {
     } catch (error) {
       console.log('Import errors not available:', error);
       setImportErrors([]);
+    }
+  };
+
+  const logImportError = async (errorMessage: string, rowData: string) => {
+    if (!user) {
+      console.log('No user authenticated, skipping error logging');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('import_errors')
+        .insert({
+          error_message: errorMessage,
+          row_data: rowData,
+          user_id: user.id
+        });
+
+      if (error) {
+        console.error('Error logging import error:', error);
+      } else {
+        // Reload import errors to show the new error
+        await loadImportErrors();
+      }
+    } catch (error) {
+      console.error('Error logging import error:', error);
     }
   };
 
@@ -269,6 +294,7 @@ export const useServiceOperations = () => {
     updateService,
     renewService,
     deleteService,
-    clearImportErrors
+    clearImportErrors,
+    logImportError
   };
 };
