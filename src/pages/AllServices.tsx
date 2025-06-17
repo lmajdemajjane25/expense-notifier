@@ -47,14 +47,6 @@ const AllServices = () => {
   const frequencies = Array.from(new Set(services.map(service => service.frequency)));
   const paidViaMethods = Array.from(new Set(services.map(service => service.paidVia).filter(Boolean)));
 
-  const logImportError = async (errorMessage: string, rowData: string) => {
-    try {
-      console.error('Import Error:', errorMessage, 'Row:', rowData);
-    } catch (error) {
-      console.error('Error logging import error:', error);
-    }
-  };
-
   const handleImportSuccess = (importedCount: number, errorCount: number) => {
     toast.success(`Import completed: ${importedCount} services imported${errorCount > 0 ? `, ${errorCount} errors` : ''}`);
     
