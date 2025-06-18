@@ -6,9 +6,18 @@ export class ConfigurationService {
   static async loadConfiguration() {
     console.log('Loading configuration from database...');
     
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.log('No authenticated user found');
+      throw new Error('User not authenticated');
+    }
+
+    console.log('Authenticated user ID:', user.id);
+    
     const { data: settings, error } = await supabase
       .from('user_settings')
       .select('setting_type, setting_value')
+      .eq('user_id', user.id)
       .in('setting_type', ['paid_via_options', 'service_types', 'provider_names', 'currencies']);
 
     if (error) {
@@ -45,12 +54,20 @@ export class ConfigurationService {
   static async saveConfiguration(type: ConfigurationType, data: string[]) {
     console.log('Saving configuration:', type, data);
     
-    // First, try to get the current user ID
-    const { data: { user } } = await supabase.auth.getUser();
+    // First, get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     
+    if (userError) {
+      console.error('Error getting user:', userError);
+      throw userError;
+    }
+
     if (!user) {
+      console.error('No authenticated user found');
       throw new Error('User not authenticated');
     }
+
+    console.log('Saving for user ID:', user.id);
 
     // Check if setting already exists
     const { data: existingSetting, error: selectError } = await supabase
@@ -58,17 +75,19 @@ export class ConfigurationService {
       .select('id')
       .eq('user_id', user.id)
       .eq('setting_type', type)
-      .single();
+      .maybeSingle();
 
-    if (selectError && selectError.code !== 'PGRST116') {
-      // PGRST116 is "not found" error, which is expected for new settings
+    if (selectError) {
       console.error('Error checking existing setting:', selectError);
       throw selectError;
     }
 
+    console.log('Existing setting:', existingSetting);
+
     let result;
     if (existingSetting) {
       // Update existing setting
+      console.log('Updating existing setting...');
       result = await supabase
         .from('user_settings')
         .update({
@@ -76,17 +95,22 @@ export class ConfigurationService {
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id)
-        .eq('setting_type', type);
+        .eq('setting_type', type)
+        .select();
     } else {
       // Insert new setting
+      console.log('Inserting new setting...');
       result = await supabase
         .from('user_settings')
         .insert({
           user_id: user.id,
           setting_type: type,
           setting_value: JSON.stringify(data)
-        });
+        })
+        .select();
     }
+
+    console.log('Save result:', result);
 
     if (result.error) {
       console.error('Error saving configuration:', result.error);
@@ -94,5 +118,6 @@ export class ConfigurationService {
     }
 
     console.log('Configuration saved successfully');
+    return result.data;
   }
 }
