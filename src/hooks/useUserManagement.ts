@@ -15,7 +15,10 @@ export const useUserManagement = () => {
   const handleCreateUser = async (userData: CreateUserData) => {
     const success = await createUser(userData);
     if (success) {
-      await loadUsers(); // Reload users after creation
+      // Wait a bit for the user to potentially confirm email
+      setTimeout(() => {
+        loadUsers(); // Reload users after creation
+      }, 1000);
     }
     return success;
   };

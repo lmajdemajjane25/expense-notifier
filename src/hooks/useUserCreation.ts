@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { CreateUserData, UserRole } from '@/types/user';
+import { CreateUserData } from '@/types/user';
 import { useToast } from '@/hooks/use-toast';
 
 export const useUserCreation = () => {
@@ -8,15 +8,17 @@ export const useUserCreation = () => {
 
   const createUser = async (userData: CreateUserData) => {
     try {
-      console.log('Creating user with data:', userData);
+      console.log('Creating user with regular signup:', userData);
       
-      // Create user in auth using the admin API
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Use regular signup instead of admin API
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: userData.full_name
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: userData.full_name || userData.email
+          }
         }
       });
 
@@ -29,46 +31,21 @@ export const useUserCreation = () => {
         throw new Error('Failed to create user - no user returned');
       }
 
-      console.log('User created in auth:', authData.user.id);
+      console.log('User created successfully:', authData.user.id);
 
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email: userData.email,
-          full_name: userData.full_name || null,
-          phone: userData.phone || null
-        });
-
-      if (profileError) {
-        console.error('Profile error:', profileError);
-        // Clean up auth user if profile creation fails
-        await supabase.auth.admin.deleteUser(authData.user.id);
-        throw profileError;
-      }
-
-      console.log('Profile created successfully');
-
-      // Assign default role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: authData.user.id,
-          role: 'normal' as UserRole
-        });
-
-      if (roleError) {
-        console.error('Role error:', roleError);
-        // Don't fail completely if role assignment fails, but log it
-        console.warn('Failed to assign default role, but user was created');
+      // If email confirmation is disabled, the user will be immediately confirmed
+      // and the profile will be created automatically via the trigger
+      if (authData.user.email_confirmed_at) {
+        console.log('User email is confirmed, profile should be created automatically');
       } else {
-        console.log('Role assigned successfully');
+        console.log('User needs to confirm email before profile is created');
       }
 
       toast({
         title: 'Success',
-        description: 'User created successfully'
+        description: authData.user.email_confirmed_at 
+          ? 'User created successfully' 
+          : 'User created successfully. Please check email for confirmation.'
       });
 
       return true;

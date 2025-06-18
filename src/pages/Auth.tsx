@@ -16,6 +16,13 @@ const Auth = () => {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
+  // Pre-fill admin credentials for easy testing
+  useEffect(() => {
+    setEmail('hassan.majjane2024@gmail.com');
+    setPassword('9ZbwLhb4vv5NMHMrC2v8x');
+    setFullName('Hassan Majjane');
+  }, []);
+
   // Redirect authenticated users
   useEffect(() => {
     if (user) {
