@@ -188,22 +188,46 @@ export const useServiceCRUD = () => {
         return;
       }
 
-      // Calculate new expiration date based on frequency
-      const currentExpDate = new Date(service.expirationDate);
-      let newExpDate = new Date(currentExpDate);
+      // Calculate new expiration date based on frequency, maintaining the original billing day
+      const originalExpDate = new Date(service.expirationDate);
+      const today = new Date();
+      let newExpDate = new Date(originalExpDate);
+
+      // Calculate how many periods to add to get a future date
+      let periodsToAdd = 1;
 
       switch (service.frequency) {
         case 'monthly':
-          newExpDate.setMonth(newExpDate.getMonth() + 1);
+          // If expired, calculate how many months to add to get to future
+          while (newExpDate <= today) {
+            newExpDate = new Date(originalExpDate);
+            newExpDate.setMonth(originalExpDate.getMonth() + periodsToAdd);
+            periodsToAdd++;
+          }
           break;
         case 'quarterly':
-          newExpDate.setMonth(newExpDate.getMonth() + 3);
+          // If expired, calculate how many quarters to add to get to future
+          while (newExpDate <= today) {
+            newExpDate = new Date(originalExpDate);
+            newExpDate.setMonth(originalExpDate.getMonth() + (periodsToAdd * 3));
+            periodsToAdd++;
+          }
           break;
         case 'yearly':
-          newExpDate.setFullYear(newExpDate.getFullYear() + 1);
+          // If expired, calculate how many years to add to get to future
+          while (newExpDate <= today) {
+            newExpDate = new Date(originalExpDate);
+            newExpDate.setFullYear(originalExpDate.getFullYear() + periodsToAdd);
+            periodsToAdd++;
+          }
           break;
         case 'weekly':
-          newExpDate.setDate(newExpDate.getDate() + 7);
+          // If expired, calculate how many weeks to add to get to future
+          while (newExpDate <= today) {
+            newExpDate = new Date(originalExpDate);
+            newExpDate.setDate(originalExpDate.getDate() + (periodsToAdd * 7));
+            periodsToAdd++;
+          }
           break;
         default:
           toast.error('Unknown frequency type');
