@@ -54,13 +54,17 @@ export const useConfigurationOperations = (
     }
 
     const newOptions = [...paidViaOptions, trimmedOption];
-    console.log('Adding paid via option:', trimmedOption);
     
     try {
-      await ConfigurationService.saveConfiguration('paid_via_options', newOptions);
+      // Update UI immediately
       setPaidViaOptions(newOptions);
+      
+      // Save to database
+      await ConfigurationService.saveConfiguration('paid_via_options', newOptions);
       handleSuccess(`Added "${trimmedOption}" to paid via options`);
     } catch (error) {
+      // Revert UI change on error
+      setPaidViaOptions(paidViaOptions);
       handleError(error);
     }
   }, [paidViaOptions, setPaidViaOptions, handleError, handleSuccess, toast]);
@@ -86,13 +90,13 @@ export const useConfigurationOperations = (
     }
 
     const newTypes = [...serviceTypes, trimmedType];
-    console.log('Adding service type:', trimmedType);
     
     try {
-      await ConfigurationService.saveConfiguration('service_types', newTypes);
       setServiceTypes(newTypes);
+      await ConfigurationService.saveConfiguration('service_types', newTypes);
       handleSuccess(`Added "${trimmedType}" to service types`);
     } catch (error) {
+      setServiceTypes(serviceTypes);
       handleError(error);
     }
   }, [serviceTypes, setServiceTypes, handleError, handleSuccess, toast]);
@@ -118,13 +122,13 @@ export const useConfigurationOperations = (
     }
 
     const newProviders = [...providerNames, trimmedProvider];
-    console.log('Adding provider name:', trimmedProvider);
     
     try {
-      await ConfigurationService.saveConfiguration('provider_names', newProviders);
       setProviderNames(newProviders);
+      await ConfigurationService.saveConfiguration('provider_names', newProviders);
       handleSuccess(`Added "${trimmedProvider}" to providers`);
     } catch (error) {
+      setProviderNames(providerNames);
       handleError(error);
     }
   }, [providerNames, setProviderNames, handleError, handleSuccess, toast]);
@@ -150,69 +154,71 @@ export const useConfigurationOperations = (
     }
 
     const newCurrencies = [...currencies, trimmedCurrency];
-    console.log('Adding currency:', trimmedCurrency);
     
     try {
-      await ConfigurationService.saveConfiguration('currencies', newCurrencies);
       setCurrencies(newCurrencies);
+      await ConfigurationService.saveConfiguration('currencies', newCurrencies);
       handleSuccess(`Added "${trimmedCurrency}" to currencies`);
     } catch (error) {
+      setCurrencies(currencies);
       handleError(error);
     }
   }, [currencies, setCurrencies, handleError, handleSuccess, toast]);
 
+  // Remove operations with optimistic updates
   const removePaidViaOption = useCallback(async (option: string) => {
     const newOptions = paidViaOptions.filter(item => item !== option);
-    console.log('Removing paid via option:', option);
     
     try {
-      await ConfigurationService.saveConfiguration('paid_via_options', newOptions);
       setPaidViaOptions(newOptions);
+      await ConfigurationService.saveConfiguration('paid_via_options', newOptions);
       handleSuccess(`Removed "${option}" from paid via options`);
     } catch (error) {
+      setPaidViaOptions(paidViaOptions);
       handleError(error);
     }
   }, [paidViaOptions, setPaidViaOptions, handleError, handleSuccess]);
 
   const removeServiceType = useCallback(async (type: string) => {
     const newTypes = serviceTypes.filter(item => item !== type);
-    console.log('Removing service type:', type);
     
     try {
-      await ConfigurationService.saveConfiguration('service_types', newTypes);
       setServiceTypes(newTypes);
+      await ConfigurationService.saveConfiguration('service_types', newTypes);
       handleSuccess(`Removed "${type}" from service types`);
     } catch (error) {
+      setServiceTypes(serviceTypes);
       handleError(error);
     }
   }, [serviceTypes, setServiceTypes, handleError, handleSuccess]);
 
   const removeProviderName = useCallback(async (provider: string) => {
     const newProviders = providerNames.filter(item => item !== provider);
-    console.log('Removing provider name:', provider);
     
     try {
-      await ConfigurationService.saveConfiguration('provider_names', newProviders);
       setProviderNames(newProviders);
+      await ConfigurationService.saveConfiguration('provider_names', newProviders);
       handleSuccess(`Removed "${provider}" from providers`);
     } catch (error) {
+      setProviderNames(providerNames);
       handleError(error);
     }
   }, [providerNames, setProviderNames, handleError, handleSuccess]);
 
   const removeCurrency = useCallback(async (currency: string) => {
     const newCurrencies = currencies.filter(item => item !== currency);
-    console.log('Removing currency:', currency);
     
     try {
-      await ConfigurationService.saveConfiguration('currencies', newCurrencies);
       setCurrencies(newCurrencies);
+      await ConfigurationService.saveConfiguration('currencies', newCurrencies);
       handleSuccess(`Removed "${currency}" from currencies`);
     } catch (error) {
+      setCurrencies(currencies);
       handleError(error);
     }
   }, [currencies, setCurrencies, handleError, handleSuccess]);
 
+  // Update operations with optimistic updates
   const updatePaidViaOption = useCallback(async (oldValue: string, newValue: string) => {
     if (!newValue || newValue.trim() === '') {
       toast({
@@ -225,7 +231,7 @@ export const useConfigurationOperations = (
 
     const trimmedNewValue = newValue.trim();
     if (trimmedNewValue === oldValue) {
-      return; // No change
+      return;
     }
 
     if (paidViaOptions.includes(trimmedNewValue)) {
@@ -238,13 +244,13 @@ export const useConfigurationOperations = (
     }
 
     const newOptions = paidViaOptions.map(item => item === oldValue ? trimmedNewValue : item);
-    console.log('Updating paid via option:', oldValue, '->', trimmedNewValue);
     
     try {
-      await ConfigurationService.saveConfiguration('paid_via_options', newOptions);
       setPaidViaOptions(newOptions);
+      await ConfigurationService.saveConfiguration('paid_via_options', newOptions);
       handleSuccess(`Updated "${oldValue}" to "${trimmedNewValue}"`);
     } catch (error) {
+      setPaidViaOptions(paidViaOptions);
       handleError(error);
     }
   }, [paidViaOptions, setPaidViaOptions, handleError, handleSuccess, toast]);
@@ -261,7 +267,7 @@ export const useConfigurationOperations = (
 
     const trimmedNewValue = newValue.trim();
     if (trimmedNewValue === oldValue) {
-      return; // No change
+      return;
     }
 
     if (serviceTypes.includes(trimmedNewValue)) {
@@ -274,13 +280,13 @@ export const useConfigurationOperations = (
     }
 
     const newTypes = serviceTypes.map(item => item === oldValue ? trimmedNewValue : item);
-    console.log('Updating service type:', oldValue, '->', trimmedNewValue);
     
     try {
-      await ConfigurationService.saveConfiguration('service_types', newTypes);
       setServiceTypes(newTypes);
+      await ConfigurationService.saveConfiguration('service_types', newTypes);
       handleSuccess(`Updated "${oldValue}" to "${trimmedNewValue}"`);
     } catch (error) {
+      setServiceTypes(serviceTypes);
       handleError(error);
     }
   }, [serviceTypes, setServiceTypes, handleError, handleSuccess, toast]);
@@ -297,7 +303,7 @@ export const useConfigurationOperations = (
 
     const trimmedNewValue = newValue.trim();
     if (trimmedNewValue === oldValue) {
-      return; // No change
+      return;
     }
 
     if (providerNames.includes(trimmedNewValue)) {
@@ -310,13 +316,13 @@ export const useConfigurationOperations = (
     }
 
     const newProviders = providerNames.map(item => item === oldValue ? trimmedNewValue : item);
-    console.log('Updating provider name:', oldValue, '->', trimmedNewValue);
     
     try {
-      await ConfigurationService.saveConfiguration('provider_names', newProviders);
       setProviderNames(newProviders);
+      await ConfigurationService.saveConfiguration('provider_names', newProviders);
       handleSuccess(`Updated "${oldValue}" to "${trimmedNewValue}"`);
     } catch (error) {
+      setProviderNames(providerNames);
       handleError(error);
     }
   }, [providerNames, setProviderNames, handleError, handleSuccess, toast]);
@@ -333,7 +339,7 @@ export const useConfigurationOperations = (
 
     const trimmedNewValue = newValue.trim().toUpperCase();
     if (trimmedNewValue === oldValue) {
-      return; // No change
+      return;
     }
 
     if (currencies.includes(trimmedNewValue)) {
@@ -346,13 +352,13 @@ export const useConfigurationOperations = (
     }
 
     const newCurrencies = currencies.map(item => item === oldValue ? trimmedNewValue : item);
-    console.log('Updating currency:', oldValue, '->', trimmedNewValue);
     
     try {
-      await ConfigurationService.saveConfiguration('currencies', newCurrencies);
       setCurrencies(newCurrencies);
+      await ConfigurationService.saveConfiguration('currencies', newCurrencies);
       handleSuccess(`Updated "${oldValue}" to "${trimmedNewValue}"`);
     } catch (error) {
+      setCurrencies(currencies);
       handleError(error);
     }
   }, [currencies, setCurrencies, handleError, handleSuccess, toast]);
