@@ -13,10 +13,17 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const t = (key: string): string => {
-    const translation = translations[language][key];
+    const translation = translations[language]?.[key];
     if (!translation) {
-      console.warn(`Translation missing for key: ${key}`);
-      return key;
+      console.warn(`Translation missing for key: ${key} in language: ${language}`);
+      // Try to get the English fallback
+      const englishFallback = translations['en']?.[key];
+      if (englishFallback) {
+        return englishFallback;
+      }
+      // Return the last part of the key as fallback
+      const keyParts = key.split('.');
+      return keyParts[keyParts.length - 1];
     }
     return translation;
   };

@@ -1,3 +1,4 @@
+
 import { Translations } from '@/types/language';
 
 export const translations: Translations = {
@@ -31,6 +32,15 @@ export const translations: Translations = {
     'dashboard.expired': 'Expired',
     'dashboard.recentServices': 'Recent Services',
     'dashboard.noServicesAdded': 'No services added yet. Add your first service to get started!',
+    
+    // Settings
+    'settings.configuration': 'Configuration',
+    'settings.providerNames': 'Provider Names',
+    'settings.serviceTypes': 'Service Types',
+    'settings.paidViaOptions': 'Payment Methods',
+    
+    // Expiry Reports
+    'expiryReports.title': 'Service Expiry Reports',
     
     // Services
     'services.addService': 'Add Service',
@@ -71,6 +81,8 @@ export const translations: Translations = {
     'services.importCompleted': 'Import completed',
     'services.servicesImported': 'services imported',
     'services.errors': 'errors',
+    'services.enabled': 'Enabled',
+    'services.disabled': 'Disabled',
 
     // Status translations
     'services.status.active': 'Active',
@@ -114,6 +126,15 @@ export const translations: Translations = {
     'dashboard.recentServices': 'Services récents',
     'dashboard.noServicesAdded': 'Aucun service ajouté. Ajoutez votre premier service pour commencer !',
     
+    // Settings
+    'settings.configuration': 'Configuration',
+    'settings.providerNames': 'Noms des fournisseurs',
+    'settings.serviceTypes': 'Types de services',
+    'settings.paidViaOptions': 'Méthodes de paiement',
+    
+    // Expiry Reports
+    'expiryReports.title': 'Rapports d\'expiration des services',
+    
     // Services
     'services.addService': 'Ajouter un service',
     'services.importExport': 'Importer / Exporter les services',
@@ -153,6 +174,8 @@ export const translations: Translations = {
     'services.importCompleted': 'Importation terminée',
     'services.servicesImported': 'services importés',
     'services.errors': 'erreurs',
+    'services.enabled': 'Activé',
+    'services.disabled': 'Désactivé',
 
     // Status translations
     'services.status.active': 'Actif',
@@ -196,6 +219,15 @@ export const translations: Translations = {
     'dashboard.recentServices': 'الخدمات الحديثة',
     'dashboard.noServicesAdded': 'لم يتم إضافة خدمات بعد. أضف خدمتك الأولى للبدء!',
     
+    // Settings
+    'settings.configuration': 'التكوين',
+    'settings.providerNames': 'أسماء المزودين',
+    'settings.serviceTypes': 'أنواع الخدمات',
+    'settings.paidViaOptions': 'طرق الدفع',
+    
+    // Expiry Reports
+    'expiryReports.title': 'تقارير انتهاء صلاحية الخدمة',
+    
     // Services
     'services.addService': 'إضافة خدمة',
     'services.importExport': 'استيراد / تصدير الخدمات',
@@ -235,6 +267,8 @@ export const translations: Translations = {
     'services.importCompleted': 'اكتمل الاستيراد',
     'services.servicesImported': 'خدمات مستوردة',
     'services.errors': 'أخطاء',
+    'services.enabled': 'مفعل',
+    'services.disabled': 'معطل',
 
     // Status translations
     'services.status.active': 'نشط',

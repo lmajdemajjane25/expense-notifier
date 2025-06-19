@@ -5,6 +5,7 @@ import { ServiceActions } from '@/components/services/ServiceActions';
 import { format } from 'date-fns';
 import { Service } from '@/types/service';
 import { RefreshCw } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ServiceTableRowProps {
   service: Service;
@@ -23,6 +24,20 @@ export const ServiceTableRow = ({
   onUpdate,
   onDelete
 }: ServiceTableRowProps) => {
+  const { t } = useLanguage();
+
+  const getTranslatedStatus = (status: string) => {
+    return t(`services.status.${status}`);
+  };
+
+  const getTranslatedFrequency = (frequency: string) => {
+    return t(`services.frequency.${frequency}`);
+  };
+
+  const getTranslatedAutoRenew = (autoRenew: boolean) => {
+    return autoRenew ? t('services.yes') : t('services.no');
+  };
+
   return (
     <tr key={service.id} className="hover:bg-gray-50">
       <td className="px-6 py-4 whitespace-nowrap">
@@ -44,7 +59,7 @@ export const ServiceTableRow = ({
         {service.amount} {service.currency}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        {service.frequency}
+        {getTranslatedFrequency(service.frequency)}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
         {format(new Date(service.expirationDate), 'dd/MM/yyyy')}
@@ -57,7 +72,7 @@ export const ServiceTableRow = ({
             ? 'bg-yellow-100 text-yellow-800'
             : 'bg-red-100 text-red-800'
         }`}>
-          {service.status}
+          {getTranslatedStatus(service.status)}
         </span>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
@@ -66,7 +81,7 @@ export const ServiceTableRow = ({
             ? 'bg-blue-100 text-blue-800' 
             : 'bg-gray-100 text-gray-800'
         }`}>
-          {service.autoRenew ? 'Enabled' : 'Disabled'}
+          {getTranslatedAutoRenew(service.autoRenew)}
         </span>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
@@ -78,7 +93,7 @@ export const ServiceTableRow = ({
             className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
           >
             <RefreshCw className="h-4 w-4 mr-1" />
-            Renew
+            {t('services.renew')}
           </Button>
           <ServiceActions
             service={service}
