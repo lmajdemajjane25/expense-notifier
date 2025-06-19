@@ -48,7 +48,7 @@ const AllServices = () => {
   const paidViaMethods = Array.from(new Set(services.map(service => service.paidVia).filter(Boolean)));
 
   const handleImportSuccess = (importedCount: number, errorCount: number) => {
-    toast.success(`Import completed: ${importedCount} services imported${errorCount > 0 ? `, ${errorCount} errors` : ''}`);
+    toast.success(`${t('services.importCompleted')}: ${importedCount} ${t('services.servicesImported')}${errorCount > 0 ? `, ${errorCount} ${t('services.errors')}` : ''}`);
     
     if (errorCount > 0) {
       setShowImportErrors(true);

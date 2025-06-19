@@ -1,5 +1,6 @@
 
 import { Checkbox } from '@/components/ui/checkbox';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ServiceTableHeaderProps {
   isAllSelected: boolean;
@@ -12,6 +13,8 @@ export const ServiceTableHeader = ({
   isPartiallySelected, 
   onSelectAll 
 }: ServiceTableHeaderProps) => {
+  const { t } = useLanguage();
+
   return (
     <thead className="bg-gray-50">
       <tr>
@@ -30,28 +33,28 @@ export const ServiceTableHeader = ({
           </div>
         </th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Service
+          {t('services.name')}
         </th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Provider
+          {t('services.provider')}
         </th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Amount
+          {t('services.amount')}
         </th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Frequency
+          {t('services.frequency')}
         </th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Expiration
+          {t('services.expirationDate')}
         </th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Status
+          {t('services.status')}
         </th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Auto-Renew
+          {t('services.autoRenew')}
         </th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Actions
+          {t('services.actions')}
         </th>
       </tr>
     </thead>

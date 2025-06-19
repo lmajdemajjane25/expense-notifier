@@ -52,6 +52,12 @@ export class AutoRenewalService {
       const currentExpDate = new Date(service.expiration_date);
       let newExpDate = new Date(currentExpDate);
 
+      // If the service is already expired, start from today
+      const today = new Date();
+      if (currentExpDate < today) {
+        newExpDate = new Date(today);
+      }
+
       switch (service.frequency) {
         case 'monthly':
           newExpDate.setMonth(newExpDate.getMonth() + 1);
@@ -71,7 +77,6 @@ export class AutoRenewalService {
       }
 
       // Calculate new status
-      const today = new Date();
       const diffTime = newExpDate.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
@@ -95,7 +100,7 @@ export class AutoRenewalService {
       if (error) {
         console.error(`Error auto-renewing service ${service.name}:`, error);
       } else {
-        console.log(`Successfully auto-renewed service: ${service.name}`);
+        console.log(`Successfully auto-renewed service: ${service.name} - New expiration: ${updateData.expiration_date}`);
       }
     } catch (error) {
       console.error(`Error processing auto-renewal for service ${service.name}:`, error);

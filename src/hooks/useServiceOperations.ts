@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Service, ImportError } from '@/types/service';
 import { useAuth } from '@/contexts/AuthContext';
 import { AutoRenewalService } from '@/services/autoRenewalService';
+import { ConfigurationService } from '@/services/configurationService';
 
 export const useServiceOperations = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -14,15 +14,21 @@ export const useServiceOperations = () => {
   // Run auto-renewal check when user logs in
   useEffect(() => {
     if (user) {
+      console.log('User authenticated, starting auto-renewal checks');
+      
       // Check for auto-renewals immediately
       AutoRenewalService.checkAndRenewServices();
       
-      // Set up periodic check every hour
+      // Set up periodic check every 30 minutes
       const intervalId = setInterval(() => {
+        console.log('Running scheduled auto-renewal check');
         AutoRenewalService.checkAndRenewServices();
-      }, 60 * 60 * 1000); // 1 hour
+      }, 30 * 60 * 1000); // 30 minutes
 
-      return () => clearInterval(intervalId);
+      return () => {
+        console.log('Clearing auto-renewal interval');
+        clearInterval(intervalId);
+      };
     }
   }, [user]);
 
@@ -130,6 +136,9 @@ export const useServiceOperations = () => {
     }
 
     try {
+      // Check if we need to add new provider or service type to configuration
+      await updateConfigurationWithNewData(serviceData.provider, serviceData.type, serviceData.paidVia);
+
       const insertData = {
         name: serviceData.name,
         description: serviceData.description,
@@ -157,6 +166,43 @@ export const useServiceOperations = () => {
     } catch (error) {
       console.error('Error adding service:', error);
       toast.error('Failed to add service');
+    }
+  };
+
+  // Helper function to update configuration with new data
+  const updateConfigurationWithNewData = async (provider: string, serviceType: string, paidVia: string) => {
+    try {
+      const config = await ConfigurationService.loadConfiguration();
+      
+      let needsUpdate = false;
+      
+      // Check and add new provider
+      if (provider && !config.providerNames.includes(provider)) {
+        config.providerNames.push(provider);
+        await ConfigurationService.saveConfiguration('provider_names', config.providerNames);
+        needsUpdate = true;
+      }
+      
+      // Check and add new service type
+      if (serviceType && !config.serviceTypes.includes(serviceType)) {
+        config.serviceTypes.push(serviceType);
+        await ConfigurationService.saveConfiguration('service_types', config.serviceTypes);
+        needsUpdate = true;
+      }
+      
+      // Check and add new paid via method
+      if (paidVia && !config.paidViaOptions.includes(paidVia)) {
+        config.paidViaOptions.push(paidVia);
+        await ConfigurationService.saveConfiguration('paid_via_options', config.paidViaOptions);
+        needsUpdate = true;
+      }
+      
+      if (needsUpdate) {
+        console.log('Configuration updated with new data from service');
+      }
+    } catch (error) {
+      console.error('Error updating configuration with new data:', error);
+      // Don't throw error as this is not critical for service creation
     }
   };
 

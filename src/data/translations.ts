@@ -13,7 +13,7 @@ export const translations: Translations = {
     
     // Dashboard
     'dashboard.welcome': 'Welcome to your dashboard',
-    'dashboard.subtitle': 'Manage your services and expenses efficiently - Data synced across all devices',
+    'dashboard.subtitle':  'Manage your services and expenses efficiently - Data synced across all devices',
     'dashboard.activeServices': 'Active Services',
     'dashboard.expiringServices': 'Expiring Services',
     'dashboard.totalExpenses': 'Total Expenses',
@@ -51,12 +51,15 @@ export const translations: Translations = {
     'services.searchServices': 'Search services...',
     'services.allStatuses': 'All Statuses',
     'services.allTypes': 'All Types',
+    'services.allProviders': 'All Providers',
+    'services.allFrequencies': 'All Frequencies',
+    'services.allPaymentMethods': 'All Payment Methods',
     'services.noServicesFound': 'No services found matching your criteria.',
-    'services.name': 'Name',
+    'services.name': 'Service',
     'services.provider': 'Provider',
     'services.amount': 'Amount',
     'services.frequency': 'Frequency',
-    'services.expirationDate': 'Expiration Date',
+    'services.expirationDate': 'Expiration',
     'services.status': 'Status',
     'services.autoRenew': 'Auto-Renew',
     'services.actions': 'Actions',
@@ -72,7 +75,10 @@ export const translations: Translations = {
     'services.yearly': 'Yearly',
     'services.quarterly': 'Quarterly',
     'services.weekly': 'Weekly',
-    
+    'services.importCompleted': 'Import completed',
+    'services.servicesImported': 'services imported',
+    'services.errors': 'errors',
+
     // Add Service Form
     'addService.title': 'Add Service',
     'addService.serviceName': 'Service Name',
@@ -146,8 +152,7 @@ export const translations: Translations = {
     'settings.saving': 'Saving...',
     'settings.profileUpdated': 'Profile updated successfully',
     'settings.profileUpdateError': 'Failed to update profile',
-    
-    // Configuration
+
     'configuration.title': 'Configuration',
     'configuration.paidVia': 'Paid Via',
     'configuration.serviceTypes': 'Service Types',
@@ -177,8 +182,7 @@ export const translations: Translations = {
     'configuration.errorUpdating': 'Error updating item',
     'configuration.errorDeleting': 'Error deleting item',
     'configuration.errorLoading': 'Error loading configuration',
-    
-    // User Management
+
     'userManagement.title': 'User Management',
     'userManagement.addUser': 'Add User',
     'userManagement.createNewUser': 'Create New User',
@@ -219,8 +223,7 @@ export const translations: Translations = {
     'userManagement.manageSessions': 'Manage Sessions',
     'userManagement.allUsers': 'All Users',
     'userManagement.searchUsers': 'Search users...',
-    
-    // Common
+
     'common.loading': 'Loading...',
     'common.error': 'Error',
     'common.success': 'Success',
@@ -244,7 +247,6 @@ export const translations: Translations = {
     'common.retry': 'Retry',
   },
   fr: {
-    // Navigation
     'nav.dashboard': 'Tableau de bord',
     'nav.allServices': 'Tous les services',
     'nav.addService': 'Ajouter un service',
@@ -253,7 +255,6 @@ export const translations: Translations = {
     'nav.settings': 'Paramètres',
     'nav.configuration': 'Configuration',
     
-    // Dashboard
     'dashboard.welcome': 'Bienvenue sur votre tableau de bord',
     'dashboard.subtitle': 'Gérez vos services et dépenses efficacement - Données synchronisées sur tous les appareils',
     'dashboard.activeServices': 'Services actifs',
@@ -274,7 +275,6 @@ export const translations: Translations = {
     'dashboard.recentServices': 'Services récents',
     'dashboard.noServicesAdded': 'Aucun service ajouté. Ajoutez votre premier service pour commencer !',
     
-    // Services
     'services.addService': 'Ajouter un service',
     'services.importExport': 'Importer / Exporter les services',
     'services.exportServices': 'Exporter les services',
@@ -293,12 +293,15 @@ export const translations: Translations = {
     'services.searchServices': 'Rechercher des services...',
     'services.allStatuses': 'Tous les statuts',
     'services.allTypes': 'Tous les types',
+    'services.allProviders': 'Tous les fournisseurs',
+    'services.allFrequencies': 'Toutes les fréquences',
+    'services.allPaymentMethods': 'Toutes les méthodes de paiement',
     'services.noServicesFound': 'Aucun service trouvé correspondant à vos critères.',
-    'services.name': 'Nom',
+    'services.name': 'Service',
     'services.provider': 'Fournisseur',
     'services.amount': 'Montant',
     'services.frequency': 'Fréquence',
-    'services.expirationDate': 'Date d\'expiration',
+    'services.expirationDate': 'Expiration',
     'services.status': 'Statut',
     'services.autoRenew': 'Renouvellement automatique',
     'services.actions': 'Actions',
@@ -314,8 +317,10 @@ export const translations: Translations = {
     'services.yearly': 'Annuel',
     'services.quarterly': 'Trimestriel',
     'services.weekly': 'Hebdomadaire',
-    
-    // Add Service Form
+    'services.importCompleted': 'Importation terminée',
+    'services.servicesImported': 'services importés',
+    'services.errors': 'erreurs',
+
     'addService.title': 'Ajouter un service',
     'addService.serviceName': 'Nom du service',
     'addService.serviceNamePlaceholder': 'Nom du service',
@@ -339,7 +344,6 @@ export const translations: Translations = {
     'addService.success': 'Service ajouté avec succès !',
     'addService.error': 'Échec de l\'ajout du service. Veuillez réessayer.',
     
-    // Reports
     'reports.title': 'Rapports',
     'reports.overview': 'Aperçu',
     'reports.exportCSV': 'Exporter CSV',
@@ -350,7 +354,6 @@ export const translations: Translations = {
     'reports.serviceStatusDistribution': 'Répartition du statut des services',
     'reports.monthlyExpensesByType': 'Dépenses mensuelles par type',
     
-    // Service Expiry Reports
     'expiryReports.title': 'Rapports d\'expiration des services',
     'expiryReports.generateSend': 'Générer et envoyer les rapports d\'expiration',
     'expiryReports.manuallyTrigger': 'Déclenchez manuellement les rapports par e-mail pour les services selon leurs dates d\'expiration.',
@@ -366,7 +369,6 @@ export const translations: Translations = {
     'expiryReports.expired10Days': 'Expiré il y a 10 jours',
     'expiryReports.expired30Days': 'Expiré il y a 30 jours',
     
-    // Settings
     'settings.title': 'Paramètres',
     'settings.configuration': 'Configuration',
     'settings.paidVia': 'Payé via',
@@ -389,7 +391,6 @@ export const translations: Translations = {
     'settings.profileUpdated': 'Profil mis à jour avec succès',
     'settings.profileUpdateError': 'Échec de la mise à jour du profil',
     
-    // Configuration
     'configuration.title': 'Configuration',
     'configuration.paidVia': 'Payé via',
     'configuration.serviceTypes': 'Types de service',
@@ -420,7 +421,6 @@ export const translations: Translations = {
     'configuration.errorDeleting': 'Erreur lors de la suppression de l\'élément',
     'configuration.errorLoading': 'Erreur lors du chargement de la configuration',
     
-    // User Management
     'userManagement.title': 'Gestion des utilisateurs',
     'userManagement.addUser': 'Ajouter un utilisateur',
     'userManagement.createNewUser': 'Créer un nouvel utilisateur',
@@ -462,7 +462,6 @@ export const translations: Translations = {
     'userManagement.allUsers': 'Tous les utilisateurs',
     'userManagement.searchUsers': 'Rechercher des utilisateurs...',
     
-    // Common
     'common.loading': 'Chargement...',
     'common.error': 'Erreur',
     'common.success': 'Succès',
@@ -486,7 +485,6 @@ export const translations: Translations = {
     'common.retry': 'Réessayer',
   },
   ar: {
-    // Navigation
     'nav.dashboard': 'لوحة التحكم',
     'nav.allServices': 'جميع الخدمات',
     'nav.addService': 'إضافة خدمة',
@@ -495,7 +493,6 @@ export const translations: Translations = {
     'nav.settings': 'الإعدادات',
     'nav.configuration': 'التكوين',
     
-    // Dashboard
     'dashboard.welcome': 'مرحباً بك في لوحة التحكم',
     'dashboard.subtitle': 'إدارة خدماتك ونفقاتك بكفاءة - البيانات متزامنة عبر جميع الأجهزة',
     'dashboard.activeServices': 'الخدمات النشطة',
@@ -516,7 +513,6 @@ export const translations: Translations = {
     'dashboard.recentServices': 'الخدمات الحديثة',
     'dashboard.noServicesAdded': 'لم يتم إضافة خدمات بعد. أضف خدمتك الأولى للبدء!',
     
-    // Services
     'services.addService': 'إضافة خدمة',
     'services.importExport': 'استيراد / تصدير الخدمات',
     'services.exportServices': 'تصدير الخدمات',
@@ -535,12 +531,15 @@ export const translations: Translations = {
     'services.searchServices': 'البحث عن الخدمات...',
     'services.allStatuses': 'جميع الحالات',
     'services.allTypes': 'جميع الأنواع',
+    'services.allProviders': 'جميع المزودين',
+    'services.allFrequencies': 'جميع الترددات',
+    'services.allPaymentMethods': 'جميع طرق الدفع',
     'services.noServicesFound': 'لم يتم العثور على خدمات تطابق معاييرك.',
-    'services.name': 'الاسم',
+    'services.name': 'الخدمة',
     'services.provider': 'المزود',
     'services.amount': 'المبلغ',
-    'services.frequency': 'التكرار',
-    'services.expirationDate': 'تاريخ انتهاء الصلاحية',
+    'services.frequency': 'التردد',
+    'services.expirationDate': 'انتهاء الصلاحية',
     'services.status': 'الحالة',
     'services.autoRenew': 'التجديد التلقائي',
     'services.actions': 'الإجراءات',
@@ -556,8 +555,10 @@ export const translations: Translations = {
     'services.yearly': 'سنوي',
     'services.quarterly': 'ربع سنوي',
     'services.weekly': 'أسبوعي',
-    
-    // Add Service Form
+    'services.importCompleted': 'اكتمل الاستيراد',
+    'services.servicesImported': 'خدمات مستوردة',
+    'services.errors': 'أخطاء',
+
     'addService.title': 'إضافة خدمة',
     'addService.serviceName': 'اسم الخدمة',
     'addService.serviceNamePlaceholder': 'اسم الخدمة',
@@ -581,7 +582,6 @@ export const translations: Translations = {
     'addService.success': 'تم إضافة الخدمة بنجاح!',
     'addService.error': 'فشل في إضافة الخدمة. الرجاء المحاولة مرة أخرى.',
     
-    // Reports
     'reports.title': 'التقارير',
     'reports.overview': 'نظرة عامة',
     'reports.exportCSV': 'تصدير CSV',
@@ -592,7 +592,6 @@ export const translations: Translations = {
     'reports.serviceStatusDistribution': 'توزيع حالة الخدمة',
     'reports.monthlyExpensesByType': 'المصاريف الشهرية حسب النوع',
     
-    // Service Expiry Reports
     'expiryReports.title': 'تقارير انتهاء صلاحية الخدمة',
     'expiryReports.generateSend': 'إنشاء وإرسال تقارير انتهاء الصلاحية',
     'expiryReports.manuallyTrigger': 'تشغيل تقارير البريد الإلكتروني يدوياً للخدمات بناءً على تواريخ انتهاء صلاحيتها.',
@@ -608,7 +607,6 @@ export const translations: Translations = {
     'expiryReports.expired10Days': 'انتهت منذ 10 أيام',
     'expiryReports.expired30Days': 'انتهت منذ 30 يوماً',
     
-    // Settings
     'settings.title': 'الإعدادات',
     'settings.configuration': 'التكوين',
     'settings.paidVia': 'مدفوع عبر',
@@ -631,7 +629,6 @@ export const translations: Translations = {
     'settings.profileUpdated': 'تم تحديث الملف الشخصي بنجاح',
     'settings.profileUpdateError': 'فشل في تحديث الملف الشخصي',
     
-    // Configuration
     'configuration.title': 'التكوين',
     'configuration.paidVia': 'مدفوع عبر',
     'configuration.serviceTypes': 'أنواع الخدمة',
@@ -662,7 +659,6 @@ export const translations: Translations = {
     'configuration.errorDeleting': 'خطأ في حذف العنصر',
     'configuration.errorLoading': 'خطأ في تحميل التكوين',
     
-    // User Management
     'userManagement.title': 'إدارة المستخدمين',
     'userManagement.addUser': 'إضافة مستخدم',
     'userManagement.createNewUser': 'إنشاء مستخدم جديد',
@@ -704,7 +700,6 @@ export const translations: Translations = {
     'userManagement.allUsers': 'جميع المستخدمين',
     'userManagement.searchUsers': 'البحث عن المستخدمين...',
     
-    // Common
     'common.loading': 'جارٍ التحميل...',
     'common.error': 'خطأ',
     'common.success': 'نجح',
