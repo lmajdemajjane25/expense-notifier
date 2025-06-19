@@ -38,6 +38,7 @@ export const useServiceOperations = () => {
     
     // Import errors operations
     importErrors: importErrorsHook.importErrors,
+    loadImportErrors: importErrorsHook.loadImportErrors,
     clearImportErrors: importErrorsHook.clearImportErrors,
     logImportError: importErrorsHook.logImportError
   };
