@@ -69,9 +69,9 @@ export const ServiceFilters = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t('services.allStatuses')}</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="expiring">Expiring</SelectItem>
-              <SelectItem value="expired">Expired</SelectItem>
+              <SelectItem value="active">{t('services.status.active')}</SelectItem>
+              <SelectItem value="expiring">{t('services.status.expiring')}</SelectItem>
+              <SelectItem value="expired">{t('services.status.expired')}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -87,10 +87,10 @@ export const ServiceFilters = ({
           </Select>
           <Select value={providerFilter} onValueChange={setProviderFilter}>
             <SelectTrigger>
-              <SelectValue placeholder="All Providers" />
+              <SelectValue placeholder={t('services.allProviders')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Providers</SelectItem>
+              <SelectItem value="all">{t('services.allProviders')}</SelectItem>
               {providers.map(provider => (
                 <SelectItem key={provider} value={provider}>{provider}</SelectItem>
               ))}
@@ -98,21 +98,21 @@ export const ServiceFilters = ({
           </Select>
           <Select value={frequencyFilter} onValueChange={setFrequencyFilter}>
             <SelectTrigger>
-              <SelectValue placeholder="All Frequencies" />
+              <SelectValue placeholder={t('services.allFrequencies')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Frequencies</SelectItem>
+              <SelectItem value="all">{t('services.allFrequencies')}</SelectItem>
               {frequencies.map(frequency => (
-                <SelectItem key={frequency} value={frequency}>{frequency}</SelectItem>
+                <SelectItem key={frequency} value={frequency}>{t(`services.frequency.${frequency}`)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={paidViaFilter} onValueChange={setPaidViaFilter}>
             <SelectTrigger>
-              <SelectValue placeholder="All Payment Methods" />
+              <SelectValue placeholder={t('services.allPaymentMethods')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Payment Methods</SelectItem>
+              <SelectItem value="all">{t('services.allPaymentMethods')}</SelectItem>
               {paidViaMethods.map(method => (
                 <SelectItem key={method} value={method}>{method}</SelectItem>
               ))}
