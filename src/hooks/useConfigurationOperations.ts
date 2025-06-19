@@ -24,165 +24,338 @@ export const useConfigurationOperations = (
     });
   }, [toast]);
 
-  const handleSuccess = useCallback(() => {
+  const handleSuccess = useCallback((message: string = 'Configuration saved successfully') => {
+    console.log(message);
     toast({
       title: 'Success',
-      description: 'Configuration saved successfully',
+      description: message,
       variant: 'default'
     });
   }, [toast]);
 
   const addPaidViaOption = useCallback(async (option: string) => {
-    if (option && !paidViaOptions.includes(option)) {
-      const newOptions = [...paidViaOptions, option];
-      try {
-        await ConfigurationService.saveConfiguration('paid_via_options', newOptions);
-        setPaidViaOptions(newOptions);
-        handleSuccess();
-      } catch (error) {
-        handleError(error);
-        // Don't update state if save failed
-      }
+    if (!option || option.trim() === '') {
+      toast({
+        title: 'Warning',
+        description: 'Please enter a valid option',
+        variant: 'destructive'
+      });
+      return;
     }
-  }, [paidViaOptions, setPaidViaOptions, handleError, handleSuccess]);
 
-  const addServiceType = useCallback(async (type: string) => {
-    if (type && !serviceTypes.includes(type)) {
-      const newTypes = [...serviceTypes, type];
-      try {
-        await ConfigurationService.saveConfiguration('service_types', newTypes);
-        setServiceTypes(newTypes);
-        handleSuccess();
-      } catch (error) {
-        handleError(error);
-        // Don't update state if save failed
-      }
+    const trimmedOption = option.trim();
+    if (paidViaOptions.includes(trimmedOption)) {
+      toast({
+        title: 'Warning',
+        description: 'This option already exists',
+        variant: 'destructive'
+      });
+      return;
     }
-  }, [serviceTypes, setServiceTypes, handleError, handleSuccess]);
 
-  const addProviderName = useCallback(async (provider: string) => {
-    if (provider && !providerNames.includes(provider)) {
-      const newProviders = [...providerNames, provider];
-      try {
-        await ConfigurationService.saveConfiguration('provider_names', newProviders);
-        setProviderNames(newProviders);
-        handleSuccess();
-      } catch (error) {
-        handleError(error);
-        // Don't update state if save failed
-      }
-    }
-  }, [providerNames, setProviderNames, handleError, handleSuccess]);
-
-  const addCurrency = useCallback(async (currency: string) => {
-    if (currency && !currencies.includes(currency)) {
-      const newCurrencies = [...currencies, currency];
-      try {
-        await ConfigurationService.saveConfiguration('currencies', newCurrencies);
-        setCurrencies(newCurrencies);
-        handleSuccess();
-      } catch (error) {
-        handleError(error);
-        // Don't update state if save failed
-      }
-    }
-  }, [currencies, setCurrencies, handleError, handleSuccess]);
-
-  const removePaidViaOption = useCallback(async (option: string) => {
-    const newOptions = paidViaOptions.filter(item => item !== option);
+    const newOptions = [...paidViaOptions, trimmedOption];
+    console.log('Adding paid via option:', trimmedOption);
+    
     try {
       await ConfigurationService.saveConfiguration('paid_via_options', newOptions);
       setPaidViaOptions(newOptions);
-      handleSuccess();
+      handleSuccess(`Added "${trimmedOption}" to paid via options`);
     } catch (error) {
       handleError(error);
-      // Don't update state if save failed
+    }
+  }, [paidViaOptions, setPaidViaOptions, handleError, handleSuccess, toast]);
+
+  const addServiceType = useCallback(async (type: string) => {
+    if (!type || type.trim() === '') {
+      toast({
+        title: 'Warning',
+        description: 'Please enter a valid service type',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const trimmedType = type.trim();
+    if (serviceTypes.includes(trimmedType)) {
+      toast({
+        title: 'Warning',
+        description: 'This service type already exists',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const newTypes = [...serviceTypes, trimmedType];
+    console.log('Adding service type:', trimmedType);
+    
+    try {
+      await ConfigurationService.saveConfiguration('service_types', newTypes);
+      setServiceTypes(newTypes);
+      handleSuccess(`Added "${trimmedType}" to service types`);
+    } catch (error) {
+      handleError(error);
+    }
+  }, [serviceTypes, setServiceTypes, handleError, handleSuccess, toast]);
+
+  const addProviderName = useCallback(async (provider: string) => {
+    if (!provider || provider.trim() === '') {
+      toast({
+        title: 'Warning',
+        description: 'Please enter a valid provider name',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const trimmedProvider = provider.trim();
+    if (providerNames.includes(trimmedProvider)) {
+      toast({
+        title: 'Warning',
+        description: 'This provider already exists',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const newProviders = [...providerNames, trimmedProvider];
+    console.log('Adding provider name:', trimmedProvider);
+    
+    try {
+      await ConfigurationService.saveConfiguration('provider_names', newProviders);
+      setProviderNames(newProviders);
+      handleSuccess(`Added "${trimmedProvider}" to providers`);
+    } catch (error) {
+      handleError(error);
+    }
+  }, [providerNames, setProviderNames, handleError, handleSuccess, toast]);
+
+  const addCurrency = useCallback(async (currency: string) => {
+    if (!currency || currency.trim() === '') {
+      toast({
+        title: 'Warning',
+        description: 'Please enter a valid currency',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const trimmedCurrency = currency.trim().toUpperCase();
+    if (currencies.includes(trimmedCurrency)) {
+      toast({
+        title: 'Warning',
+        description: 'This currency already exists',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const newCurrencies = [...currencies, trimmedCurrency];
+    console.log('Adding currency:', trimmedCurrency);
+    
+    try {
+      await ConfigurationService.saveConfiguration('currencies', newCurrencies);
+      setCurrencies(newCurrencies);
+      handleSuccess(`Added "${trimmedCurrency}" to currencies`);
+    } catch (error) {
+      handleError(error);
+    }
+  }, [currencies, setCurrencies, handleError, handleSuccess, toast]);
+
+  const removePaidViaOption = useCallback(async (option: string) => {
+    const newOptions = paidViaOptions.filter(item => item !== option);
+    console.log('Removing paid via option:', option);
+    
+    try {
+      await ConfigurationService.saveConfiguration('paid_via_options', newOptions);
+      setPaidViaOptions(newOptions);
+      handleSuccess(`Removed "${option}" from paid via options`);
+    } catch (error) {
+      handleError(error);
     }
   }, [paidViaOptions, setPaidViaOptions, handleError, handleSuccess]);
 
   const removeServiceType = useCallback(async (type: string) => {
     const newTypes = serviceTypes.filter(item => item !== type);
+    console.log('Removing service type:', type);
+    
     try {
       await ConfigurationService.saveConfiguration('service_types', newTypes);
       setServiceTypes(newTypes);
-      handleSuccess();
+      handleSuccess(`Removed "${type}" from service types`);
     } catch (error) {
       handleError(error);
-      // Don't update state if save failed
     }
   }, [serviceTypes, setServiceTypes, handleError, handleSuccess]);
 
   const removeProviderName = useCallback(async (provider: string) => {
     const newProviders = providerNames.filter(item => item !== provider);
+    console.log('Removing provider name:', provider);
+    
     try {
       await ConfigurationService.saveConfiguration('provider_names', newProviders);
       setProviderNames(newProviders);
-      handleSuccess();
+      handleSuccess(`Removed "${provider}" from providers`);
     } catch (error) {
       handleError(error);
-      // Don't update state if save failed
     }
   }, [providerNames, setProviderNames, handleError, handleSuccess]);
 
   const removeCurrency = useCallback(async (currency: string) => {
     const newCurrencies = currencies.filter(item => item !== currency);
+    console.log('Removing currency:', currency);
+    
     try {
       await ConfigurationService.saveConfiguration('currencies', newCurrencies);
       setCurrencies(newCurrencies);
-      handleSuccess();
+      handleSuccess(`Removed "${currency}" from currencies`);
     } catch (error) {
       handleError(error);
-      // Don't update state if save failed
     }
   }, [currencies, setCurrencies, handleError, handleSuccess]);
 
   const updatePaidViaOption = useCallback(async (oldValue: string, newValue: string) => {
-    const newOptions = paidViaOptions.map(item => item === oldValue ? newValue : item);
+    if (!newValue || newValue.trim() === '') {
+      toast({
+        title: 'Warning',
+        description: 'Please enter a valid option',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const trimmedNewValue = newValue.trim();
+    if (trimmedNewValue === oldValue) {
+      return; // No change
+    }
+
+    if (paidViaOptions.includes(trimmedNewValue)) {
+      toast({
+        title: 'Warning',
+        description: 'This option already exists',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const newOptions = paidViaOptions.map(item => item === oldValue ? trimmedNewValue : item);
+    console.log('Updating paid via option:', oldValue, '->', trimmedNewValue);
+    
     try {
       await ConfigurationService.saveConfiguration('paid_via_options', newOptions);
       setPaidViaOptions(newOptions);
-      handleSuccess();
+      handleSuccess(`Updated "${oldValue}" to "${trimmedNewValue}"`);
     } catch (error) {
       handleError(error);
-      // Don't update state if save failed
     }
-  }, [paidViaOptions, setPaidViaOptions, handleError, handleSuccess]);
+  }, [paidViaOptions, setPaidViaOptions, handleError, handleSuccess, toast]);
 
   const updateServiceType = useCallback(async (oldValue: string, newValue: string) => {
-    const newTypes = serviceTypes.map(item => item === oldValue ? newValue : item);
+    if (!newValue || newValue.trim() === '') {
+      toast({
+        title: 'Warning',
+        description: 'Please enter a valid service type',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const trimmedNewValue = newValue.trim();
+    if (trimmedNewValue === oldValue) {
+      return; // No change
+    }
+
+    if (serviceTypes.includes(trimmedNewValue)) {
+      toast({
+        title: 'Warning',
+        description: 'This service type already exists',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const newTypes = serviceTypes.map(item => item === oldValue ? trimmedNewValue : item);
+    console.log('Updating service type:', oldValue, '->', trimmedNewValue);
+    
     try {
       await ConfigurationService.saveConfiguration('service_types', newTypes);
       setServiceTypes(newTypes);
-      handleSuccess();
+      handleSuccess(`Updated "${oldValue}" to "${trimmedNewValue}"`);
     } catch (error) {
       handleError(error);
-      // Don't update state if save failed
     }
-  }, [serviceTypes, setServiceTypes, handleError, handleSuccess]);
+  }, [serviceTypes, setServiceTypes, handleError, handleSuccess, toast]);
 
   const updateProviderName = useCallback(async (oldValue: string, newValue: string) => {
-    const newProviders = providerNames.map(item => item === oldValue ? newValue : item);
+    if (!newValue || newValue.trim() === '') {
+      toast({
+        title: 'Warning',
+        description: 'Please enter a valid provider name',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const trimmedNewValue = newValue.trim();
+    if (trimmedNewValue === oldValue) {
+      return; // No change
+    }
+
+    if (providerNames.includes(trimmedNewValue)) {
+      toast({
+        title: 'Warning',
+        description: 'This provider already exists',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const newProviders = providerNames.map(item => item === oldValue ? trimmedNewValue : item);
+    console.log('Updating provider name:', oldValue, '->', trimmedNewValue);
+    
     try {
       await ConfigurationService.saveConfiguration('provider_names', newProviders);
       setProviderNames(newProviders);
-      handleSuccess();
+      handleSuccess(`Updated "${oldValue}" to "${trimmedNewValue}"`);
     } catch (error) {
       handleError(error);
-      // Don't update state if save failed
     }
-  }, [providerNames, setProviderNames, handleError, handleSuccess]);
+  }, [providerNames, setProviderNames, handleError, handleSuccess, toast]);
 
   const updateCurrency = useCallback(async (oldValue: string, newValue: string) => {
-    const newCurrencies = currencies.map(item => item === oldValue ? newValue : item);
+    if (!newValue || newValue.trim() === '') {
+      toast({
+        title: 'Warning',
+        description: 'Please enter a valid currency',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const trimmedNewValue = newValue.trim().toUpperCase();
+    if (trimmedNewValue === oldValue) {
+      return; // No change
+    }
+
+    if (currencies.includes(trimmedNewValue)) {
+      toast({
+        title: 'Warning',
+        description: 'This currency already exists',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const newCurrencies = currencies.map(item => item === oldValue ? trimmedNewValue : item);
+    console.log('Updating currency:', oldValue, '->', trimmedNewValue);
+    
     try {
       await ConfigurationService.saveConfiguration('currencies', newCurrencies);
       setCurrencies(newCurrencies);
-      handleSuccess();
+      handleSuccess(`Updated "${oldValue}" to "${trimmedNewValue}"`);
     } catch (error) {
       handleError(error);
-      // Don't update state if save failed
     }
-  }, [currencies, setCurrencies, handleError, handleSuccess]);
+  }, [currencies, setCurrencies, handleError, handleSuccess, toast]);
 
   return {
     addPaidViaOption,
