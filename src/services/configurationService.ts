@@ -54,7 +54,6 @@ export class ConfigurationService {
   static async saveConfiguration(type: ConfigurationType, data: string[]) {
     console.log('Saving configuration:', type, data);
     
-    // First, get the current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError) {
@@ -69,55 +68,27 @@ export class ConfigurationService {
 
     console.log('Saving for user ID:', user.id);
 
-    // Check if setting already exists
-    const { data: existingSetting, error: selectError } = await supabase
+    // Use upsert to handle both insert and update cases
+    const { data: result, error } = await supabase
       .from('user_settings')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('setting_type', type)
-      .maybeSingle();
-
-    if (selectError) {
-      console.error('Error checking existing setting:', selectError);
-      throw selectError;
-    }
-
-    console.log('Existing setting:', existingSetting);
-
-    let result;
-    if (existingSetting) {
-      // Update existing setting
-      console.log('Updating existing setting...');
-      result = await supabase
-        .from('user_settings')
-        .update({
-          setting_value: JSON.stringify(data),
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id)
-        .eq('setting_type', type)
-        .select();
-    } else {
-      // Insert new setting
-      console.log('Inserting new setting...');
-      result = await supabase
-        .from('user_settings')
-        .insert({
-          user_id: user.id,
-          setting_type: type,
-          setting_value: JSON.stringify(data)
-        })
-        .select();
-    }
+      .upsert({
+        user_id: user.id,
+        setting_type: type,
+        setting_value: JSON.stringify(data),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,setting_type'
+      })
+      .select();
 
     console.log('Save result:', result);
 
-    if (result.error) {
-      console.error('Error saving configuration:', result.error);
-      throw result.error;
+    if (error) {
+      console.error('Error saving configuration:', error);
+      throw error;
     }
 
     console.log('Configuration saved successfully');
-    return result.data;
+    return result;
   }
 }

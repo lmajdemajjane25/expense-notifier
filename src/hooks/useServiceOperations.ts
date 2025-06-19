@@ -1,13 +1,30 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Service, ImportError } from '@/types/service';
 import { useAuth } from '@/contexts/AuthContext';
+import { AutoRenewalService } from '@/services/autoRenewalService';
 
 export const useServiceOperations = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [importErrors, setImportErrors] = useState<ImportError[]>([]);
   const { user } = useAuth();
+
+  // Run auto-renewal check when user logs in
+  useEffect(() => {
+    if (user) {
+      // Check for auto-renewals immediately
+      AutoRenewalService.checkAndRenewServices();
+      
+      // Set up periodic check every hour
+      const intervalId = setInterval(() => {
+        AutoRenewalService.checkAndRenewServices();
+      }, 60 * 60 * 1000); // 1 hour
+
+      return () => clearInterval(intervalId);
+    }
+  }, [user]);
 
   // Calculate service status based on expiration date
   const calculateStatus = (expirationDate: string): Service['status'] => {
