@@ -28,8 +28,8 @@ const BasicAuth = ({ children }: BasicAuthProps) => {
       return;
     }
 
-    // Check if user is already authenticated
-    const isBasicAuthValid = sessionStorage.getItem('basicAuthValid');
+    // Check if user is already authenticated - use localStorage instead of sessionStorage
+    const isBasicAuthValid = localStorage.getItem('basicAuthValid');
     if (isBasicAuthValid === 'true') {
       setIsAuthenticated(true);
     }
@@ -47,12 +47,21 @@ const BasicAuth = ({ children }: BasicAuthProps) => {
 
     if (username === requiredUsername && password === requiredPassword) {
       setIsAuthenticated(true);
-      sessionStorage.setItem('basicAuthValid', 'true');
+      // Use localStorage instead of sessionStorage to persist across browser sessions
+      localStorage.setItem('basicAuthValid', 'true');
     } else {
       setError('Invalid username or password');
       setUsername('');
       setPassword('');
     }
+  };
+
+  // Clear session data on logout
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('basicAuthValid');
+    setUsername('');
+    setPassword('');
   };
 
   if (isLoading) {
@@ -108,6 +117,7 @@ const BasicAuth = ({ children }: BasicAuthProps) => {
                   placeholder="Enter username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  autoComplete="off"
                   required
                 />
               </div>
@@ -119,6 +129,7 @@ const BasicAuth = ({ children }: BasicAuthProps) => {
                   placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="off"
                   required
                 />
               </div>

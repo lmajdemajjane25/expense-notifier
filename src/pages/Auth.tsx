@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -16,15 +16,8 @@ const Auth = () => {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
-  // Pre-fill admin credentials for easy testing
-  useEffect(() => {
-    setEmail('hassan.majjane2024@gmail.com');
-    setPassword('9ZbwLhb4vv5NMHMrC2v8x');
-    setFullName('Hassan Majjane');
-  }, []);
-
   // Redirect authenticated users
-  useEffect(() => {
+  React.useEffect(() => {
     if (user) {
       navigate('/', { replace: true });
     }
@@ -78,6 +71,7 @@ const Auth = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="off"
                     required
                   />
                 </div>
@@ -89,6 +83,7 @@ const Auth = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="off"
                     required
                   />
                 </div>
@@ -112,6 +107,7 @@ const Auth = () => {
                     placeholder="Enter your full name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
+                    autoComplete="off"
                   />
                 </div>
                 <div className="space-y-2">
@@ -122,6 +118,7 @@ const Auth = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="off"
                     required
                   />
                 </div>
@@ -133,6 +130,7 @@ const Auth = () => {
                     placeholder="Create a password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="off"
                     required
                   />
                 </div>
