@@ -3,6 +3,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { Service } from '@/types/service';
 
 export class AutoRenewalService {
+  // Helper function to calculate status with 11-day threshold
+  private static calculateStatus(expirationDate: string): string {
+    const today = new Date();
+    const expDate = new Date(expirationDate);
+    const diffTime = expDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return 'expired';
+    if (diffDays <= 11) return 'expiring'; // Changed from 30 to 11 days
+    return 'active';
+  }
+
   static async checkAndRenewServices(): Promise<void> {
     console.log('Checking for services that need auto-renewal...');
     
@@ -94,14 +106,8 @@ export class AutoRenewalService {
           return;
       }
 
-      // Calculate new status
-      const diffTime = newExpDate.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      let newStatus: string;
-      if (diffDays < 0) newStatus = 'expired';
-      else if (diffDays <= 30) newStatus = 'expiring';
-      else newStatus = 'active';
+      // Use the new calculateStatus method with 11-day threshold
+      const newStatus = this.calculateStatus(newExpDate.toISOString().split('T')[0]);
 
       const updateData = {
         expiration_date: newExpDate.toISOString().split('T')[0],

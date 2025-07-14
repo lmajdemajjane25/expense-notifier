@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -10,7 +9,7 @@ export const useServiceCRUD = () => {
   const [services, setServices] = useState<Service[]>([]);
   const { user } = useAuth();
 
-  // Calculate service status based on expiration date
+  // Calculate service status based on expiration date - Updated to use 11 days threshold
   const calculateStatus = (expirationDate: string): Service['status'] => {
     const today = new Date();
     const expDate = new Date(expirationDate);
@@ -18,7 +17,7 @@ export const useServiceCRUD = () => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) return 'expired';
-    if (diffDays <= 30) return 'expiring';
+    if (diffDays <= 11) return 'expiring'; // Changed from 30 to 11 days
     return 'active';
   };
 
@@ -59,7 +58,6 @@ export const useServiceCRUD = () => {
     }
   };
 
-  // Helper function to update configuration with new data
   const updateConfigurationWithNewData = async (provider: string, serviceType: string, paidVia: string) => {
     try {
       const config = await ConfigurationService.loadConfiguration();
