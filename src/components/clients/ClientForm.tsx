@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useConfiguration } from '@/contexts/ConfigurationContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,6 +34,7 @@ interface ClientFormProps {
 }
 
 export const ClientForm: React.FC<ClientFormProps> = ({ client, onSubmit }) => {
+  const { currencies, contractTypes, renewalFrequencies, paymentStatuses } = useConfiguration();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [dateDebut, setDateDebut] = React.useState<Date | undefined>(
     client?.date_debut ? new Date(client.date_debut) : undefined
@@ -185,11 +187,11 @@ export const ClientForm: React.FC<ClientFormProps> = ({ client, onSubmit }) => {
             <SelectTrigger>
               <SelectValue placeholder="Devise" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="EUR">EUR</SelectItem>
-              <SelectItem value="USD">USD</SelectItem>
-              <SelectItem value="GBP">GBP</SelectItem>
-            </SelectContent>
+                <SelectContent>
+                  {currencies.map((currency) => (
+                    <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                  ))}
+                </SelectContent>
           </Select>
         </div>
 

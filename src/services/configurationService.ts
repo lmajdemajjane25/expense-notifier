@@ -26,7 +26,7 @@ export class ConfigurationService {
         .from('user_settings')
         .select('setting_type, setting_value')
         .eq('user_id', user.id)
-        .in('setting_type', ['paid_via_options', 'service_types', 'provider_names', 'currencies']);
+        .in('setting_type', ['paid_via_options', 'service_types', 'provider_names', 'currencies', 'contract_types', 'renewal_frequencies', 'payment_statuses', 'service_statuses']);
 
       if (forceRefresh) {
         query.order('updated_at', { ascending: false });
@@ -45,12 +45,20 @@ export class ConfigurationService {
       const serviceTypesData = settings?.find(s => s.setting_type === 'service_types')?.setting_value;
       const providerNamesData = settings?.find(s => s.setting_type === 'provider_names')?.setting_value;
       const currenciesData = settings?.find(s => s.setting_type === 'currencies')?.setting_value;
+      const contractTypesData = settings?.find(s => s.setting_type === 'contract_types')?.setting_value;
+      const renewalFrequenciesData = settings?.find(s => s.setting_type === 'renewal_frequencies')?.setting_value;
+      const paymentStatusesData = settings?.find(s => s.setting_type === 'payment_statuses')?.setting_value;
+      const serviceStatusesData = settings?.find(s => s.setting_type === 'service_statuses')?.setting_value;
 
       return {
         paidViaOptions: paidViaData ? JSON.parse(paidViaData) : this.getDefaultPaidViaOptions(),
         serviceTypes: serviceTypesData ? JSON.parse(serviceTypesData) : this.getDefaultServiceTypes(),
         providerNames: providerNamesData ? JSON.parse(providerNamesData) : this.getDefaultProviderNames(),
-        currencies: currenciesData ? JSON.parse(currenciesData) : this.getDefaultCurrencies()
+        currencies: currenciesData ? JSON.parse(currenciesData) : this.getDefaultCurrencies(),
+        contractTypes: contractTypesData ? JSON.parse(contractTypesData) : this.getDefaultContractTypes(),
+        renewalFrequencies: renewalFrequenciesData ? JSON.parse(renewalFrequenciesData) : this.getDefaultRenewalFrequencies(),
+        paymentStatuses: paymentStatusesData ? JSON.parse(paymentStatusesData) : this.getDefaultPaymentStatuses(),
+        serviceStatuses: serviceStatusesData ? JSON.parse(serviceStatusesData) : this.getDefaultServiceStatuses()
       };
     } catch (error) {
       console.error('Unexpected error loading configuration:', error);
@@ -63,7 +71,11 @@ export class ConfigurationService {
       paidViaOptions: this.getDefaultPaidViaOptions(),
       serviceTypes: this.getDefaultServiceTypes(),
       providerNames: this.getDefaultProviderNames(),
-      currencies: this.getDefaultCurrencies()
+      currencies: this.getDefaultCurrencies(),
+      contractTypes: this.getDefaultContractTypes(),
+      renewalFrequencies: this.getDefaultRenewalFrequencies(),
+      paymentStatuses: this.getDefaultPaymentStatuses(),
+      serviceStatuses: this.getDefaultServiceStatuses()
     };
   }
 
@@ -76,21 +88,45 @@ export class ConfigurationService {
 
   static getDefaultServiceTypes() {
     return [
-      'Hosting', 'Domain', 'Email', 'Software', 'Cloud Storage', 'VPS', 
-      'CDN', 'Security', 'Analytics', 'Marketing', 'Communication', 'Database'
+      'Web Hosting', 'Domain Registration', 'Email Service', 'Software License', 'Cloud Storage', 'Virtual Private Server', 
+      'Content Delivery Network', 'Security Service', 'Analytics Platform', 'Marketing Tool', 'Communication Service', 'Database Service'
     ];
   }
 
   static getDefaultProviderNames() {
     return [
-      'AWS', 'Google', 'Microsoft', 'OVH', 'Contabo', 'DigitalOcean', 
-      'Cloudflare', 'GoDaddy', 'Namecheap', 'Vultr', 'Linode', 'Hetzner'
+      'Amazon Web Services', 'Google Cloud Platform', 'Microsoft Azure', 'OVH Cloud', 'Contabo', 'DigitalOcean', 
+      'Cloudflare', 'GoDaddy', 'Namecheap', 'Vultr', 'Linode', 'Hetzner Online'
     ];
   }
 
   static getDefaultCurrencies() {
     return [
       'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'SEK', 'NOK', 'DKK'
+    ];
+  }
+
+  static getDefaultContractTypes() {
+    return [
+      'Standard Contract', 'Premium Contract', 'Enterprise Contract', 'Basic Contract', 'Professional Contract', 'Custom Contract'
+    ];
+  }
+
+  static getDefaultRenewalFrequencies() {
+    return [
+      'Monthly', 'Quarterly', 'Semi-Annually', 'Annually', 'Bi-Annually'
+    ];
+  }
+
+  static getDefaultPaymentStatuses() {
+    return [
+      'Paid', 'Pending', 'Overdue', 'Failed', 'Cancelled', 'Refunded'
+    ];
+  }
+
+  static getDefaultServiceStatuses() {
+    return [
+      'Active', 'Expiring', 'Expired', 'Suspended', 'Cancelled', 'Renewed'
     ];
   }
 

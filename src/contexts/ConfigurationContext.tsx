@@ -17,9 +17,13 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
   const [providerNames, setProviderNames] = useState<string[]>([]);
   const [currencies, setCurrencies] = useState<string[]>([]);
+  const [contractTypes, setContractTypes] = useState<string[]>([]);
+  const [renewalFrequencies, setRenewalFrequencies] = useState<string[]>([]);
+  const [paymentStatuses, setPaymentStatuses] = useState<string[]>([]);
+  const [serviceStatuses, setServiceStatuses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const frequencies = ['weekly', 'monthly', 'quarterly', 'yearly'];
+  const frequencies = ['Weekly', 'Monthly', 'Quarterly', 'Annually'];
 
   // Force refresh function
   const refreshConfiguration = useCallback(async () => {
@@ -34,6 +38,10 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
       setServiceTypes(config.serviceTypes);
       setProviderNames(config.providerNames);
       setCurrencies(config.currencies);
+      setContractTypes(config.contractTypes);
+      setRenewalFrequencies(config.renewalFrequencies);
+      setPaymentStatuses(config.paymentStatuses);
+      setServiceStatuses(config.serviceStatuses);
       
       console.log('Configuration refreshed successfully');
     } catch (error: any) {
@@ -53,9 +61,12 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
     serviceTypes,
     providerNames,
     currencies,
+    contractTypes,
+    renewalFrequencies,
+    paymentStatuses,
+    serviceStatuses,
     (options) => {
       setPaidViaOptions(options);
-      // Force refresh after a delay to ensure consistency
       setTimeout(refreshConfiguration, 500);
     },
     (types) => {
@@ -68,6 +79,22 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
     },
     (currencies) => {
       setCurrencies(currencies);
+      setTimeout(refreshConfiguration, 500);
+    },
+    (types) => {
+      setContractTypes(types);
+      setTimeout(refreshConfiguration, 500);
+    },
+    (frequencies) => {
+      setRenewalFrequencies(frequencies);
+      setTimeout(refreshConfiguration, 500);
+    },
+    (statuses) => {
+      setPaymentStatuses(statuses);
+      setTimeout(refreshConfiguration, 500);
+    },
+    (statuses) => {
+      setServiceStatuses(statuses);
       setTimeout(refreshConfiguration, 500);
     }
   );
@@ -82,6 +109,10 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
         setServiceTypes(defaults.serviceTypes);
         setProviderNames(defaults.providerNames);
         setCurrencies(defaults.currencies);
+        setContractTypes(defaults.contractTypes);
+        setRenewalFrequencies(defaults.renewalFrequencies);
+        setPaymentStatuses(defaults.paymentStatuses);
+        setServiceStatuses(defaults.serviceStatuses);
         setLoading(false);
         return;
       }
@@ -95,6 +126,10 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
         setServiceTypes(config.serviceTypes);
         setProviderNames(config.providerNames);
         setCurrencies(config.currencies);
+        setContractTypes(config.contractTypes);
+        setRenewalFrequencies(config.renewalFrequencies);
+        setPaymentStatuses(config.paymentStatuses);
+        setServiceStatuses(config.serviceStatuses);
 
       } catch (error: any) {
         console.error('Error loading configuration:', error);
@@ -110,6 +145,10 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
         setServiceTypes(defaults.serviceTypes);
         setProviderNames(defaults.providerNames);
         setCurrencies(defaults.currencies);
+        setContractTypes(defaults.contractTypes);
+        setRenewalFrequencies(defaults.renewalFrequencies);
+        setPaymentStatuses(defaults.paymentStatuses);
+        setServiceStatuses(defaults.serviceStatuses);
       } finally {
         setLoading(false);
       }
@@ -156,6 +195,10 @@ export const ConfigurationProvider = ({ children }: { children: ReactNode }) => 
         providerNames,
         currencies,
         frequencies,
+        contractTypes,
+        renewalFrequencies,
+        paymentStatuses,
+        serviceStatuses,
         loading,
         ...operations
       }}

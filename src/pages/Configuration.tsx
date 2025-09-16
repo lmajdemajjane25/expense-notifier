@@ -12,6 +12,10 @@ const Configuration = () => {
     serviceTypes,
     providerNames,
     currencies,
+    contractTypes,
+    renewalFrequencies,
+    paymentStatuses,
+    serviceStatuses,
     loading,
     newPaidVia,
     setNewPaidVia,
@@ -21,15 +25,31 @@ const Configuration = () => {
     setNewProviderName,
     newCurrency,
     setNewCurrency,
+    newContractType,
+    setNewContractType,
+    newRenewalFrequency,
+    setNewRenewalFrequency,
+    newPaymentStatus,
+    setNewPaymentStatus,
+    newServiceStatus,
+    setNewServiceStatus,
     editingItem,
     handleAddPaidVia,
     handleAddServiceType,
     handleAddProviderName,
     handleAddCurrency,
+    handleAddContractType,
+    handleAddRenewalFrequency,
+    handleAddPaymentStatus,
+    handleAddServiceStatus,
     removePaidViaOption,
     removeServiceType,
     removeProviderName,
     removeCurrency,
+    removeContractType,
+    removeRenewalFrequency,
+    removePaymentStatus,
+    removeServiceStatus,
     startEditing,
     cancelEditing,
     saveEdit,
@@ -41,7 +61,7 @@ const Configuration = () => {
       <div className="space-y-4 max-w-6xl">
         <ConfigurationHeader />
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <Skeleton key={i} className="h-64 w-full" />
           ))}
         </div>
@@ -55,16 +75,16 @@ const Configuration = () => {
 
       {/* Settings Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-        {/* Paid Via Options */}
+        {/* Payment Methods */}
         <SettingsSection
-          title={t('settings.paidVia')}
+          title={t('settings.paymentMethods')}
           items={paidViaOptions}
           newValue={newPaidVia}
           setNewValue={setNewPaidVia}
           onAdd={handleAddPaidVia}
           onRemove={removePaidViaOption}
           totalCount={paidViaOptions.length}
-          placeholder={t('settings.addNewPaidVia')}
+          placeholder={t('settings.addNewPaymentMethod')}
           type="paidVia"
           editingItem={editingItem}
           onStartEditing={startEditing}
@@ -109,9 +129,9 @@ const Configuration = () => {
           onEditInputChange={handleEditInputChange}
         />
 
-        {/* Currency Section */}
+        {/* Currencies */}
         <SettingsSection
-          title={t('settings.currency')}
+          title={t('settings.currencies')}
           items={currencies}
           newValue={newCurrency}
           setNewValue={setNewCurrency}
@@ -120,6 +140,78 @@ const Configuration = () => {
           totalCount={currencies.length}
           placeholder={t('settings.addNewCurrency')}
           type="currency"
+          editingItem={editingItem}
+          onStartEditing={startEditing}
+          onCancelEditing={cancelEditing}
+          onSaveEdit={saveEdit}
+          onEditInputChange={handleEditInputChange}
+        />
+
+        {/* Contract Types */}
+        <SettingsSection
+          title={t('settings.contractTypes')}
+          items={contractTypes}
+          newValue={newContractType}
+          setNewValue={setNewContractType}
+          onAdd={handleAddContractType}
+          onRemove={removeContractType}
+          totalCount={contractTypes.length}
+          placeholder={t('settings.addNewContractType')}
+          type="contractType"
+          editingItem={editingItem}
+          onStartEditing={startEditing}
+          onCancelEditing={cancelEditing}
+          onSaveEdit={saveEdit}
+          onEditInputChange={handleEditInputChange}
+        />
+
+        {/* Renewal Frequencies */}
+        <SettingsSection
+          title={t('settings.renewalFrequencies')}
+          items={renewalFrequencies}
+          newValue={newRenewalFrequency}
+          setNewValue={setNewRenewalFrequency}
+          onAdd={handleAddRenewalFrequency}
+          onRemove={removeRenewalFrequency}
+          totalCount={renewalFrequencies.length}
+          placeholder={t('settings.addNewRenewalFrequency')}
+          type="renewalFrequency"
+          editingItem={editingItem}
+          onStartEditing={startEditing}
+          onCancelEditing={cancelEditing}
+          onSaveEdit={saveEdit}
+          onEditInputChange={handleEditInputChange}
+        />
+
+        {/* Payment Statuses */}
+        <SettingsSection
+          title={t('settings.paymentStatuses')}
+          items={paymentStatuses}
+          newValue={newPaymentStatus}
+          setNewValue={setNewPaymentStatus}
+          onAdd={handleAddPaymentStatus}
+          onRemove={removePaymentStatus}
+          totalCount={paymentStatuses.length}
+          placeholder={t('settings.addNewPaymentStatus')}
+          type="paymentStatus"
+          editingItem={editingItem}
+          onStartEditing={startEditing}
+          onCancelEditing={cancelEditing}
+          onSaveEdit={saveEdit}
+          onEditInputChange={handleEditInputChange}
+        />
+
+        {/* Service Statuses */}
+        <SettingsSection
+          title={t('settings.serviceStatuses')}
+          items={serviceStatuses}
+          newValue={newServiceStatus}
+          setNewValue={setNewServiceStatus}
+          onAdd={handleAddServiceStatus}
+          onRemove={removeServiceStatus}
+          totalCount={serviceStatuses.length}
+          placeholder={t('settings.addNewServiceStatus')}
+          type="serviceStatus"
           editingItem={editingItem}
           onStartEditing={startEditing}
           onCancelEditing={cancelEditing}
