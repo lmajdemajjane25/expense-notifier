@@ -14,6 +14,8 @@ import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import AllServices from "./pages/AllServices";
 import AddService from "./pages/AddService";
+import AllClients from "./pages/AllClients";
+import AddClient from "./pages/AddClient";
 import Reports from "./pages/Reports";
 import ServiceExpiryReports from "./pages/ServiceExpiryReports";
 import Settings from "./pages/Settings";
@@ -44,6 +46,8 @@ const App = () => (
                       <Route index element={<Dashboard />} />
                       <Route path="services" element={<AllServices />} />
                       <Route path="add-service" element={<AddService />} />
+                      <Route path="clients" element={<AllClients />} />
+                      <Route path="add-client" element={<AddClient />} />
                       <Route path="reports" element={<Reports />} />
                       <Route path="service-expiry-reports" element={<ServiceExpiryReports />} />
                       <Route path="configuration" element={<Configuration />} />

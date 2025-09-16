@@ -9,7 +9,8 @@ import {
   BarChart3, 
   FileText, 
   Settings,
-  Cog
+  Cog,
+  Users
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -34,6 +35,12 @@ const Sidebar = () => {
       href: '/add-service',
       icon: Plus,
       current: location.pathname === '/add-service'
+    },
+    {
+      name: 'Clients',
+      href: '/clients',
+      icon: Users,
+      current: location.pathname === '/clients' || location.pathname === '/add-client'
     },
     {
       name: t('nav.reports'),

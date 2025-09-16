@@ -59,6 +59,57 @@ export type Database = {
         }
         Relationships: []
       }
+      clients: {
+        Row: {
+          adresse: string | null
+          created_at: string
+          date_debut: string | null
+          devise: string
+          entreprise: string | null
+          id: string
+          montant_contrat: number | null
+          nom_du_client: string
+          renouvellement: string
+          responsable_interne: string | null
+          statut_paiement: string
+          type_contrat: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          adresse?: string | null
+          created_at?: string
+          date_debut?: string | null
+          devise?: string
+          entreprise?: string | null
+          id?: string
+          montant_contrat?: number | null
+          nom_du_client: string
+          renouvellement?: string
+          responsable_interne?: string | null
+          statut_paiement?: string
+          type_contrat?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          adresse?: string | null
+          created_at?: string
+          date_debut?: string | null
+          devise?: string
+          entreprise?: string | null
+          id?: string
+          montant_contrat?: number | null
+          nom_du_client?: string
+          renouvellement?: string
+          responsable_interne?: string | null
+          statut_paiement?: string
+          type_contrat?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number
