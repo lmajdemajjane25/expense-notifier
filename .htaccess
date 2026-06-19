@@ -1,8 +1,5 @@
-
-AuthType Basic
-AuthName "Protected Area"
-AuthUserFile /var/www/html/.htpasswd
-Require valid-user
+# Authentication temporarily disabled.
+# (Previous AuthType Basic / Require valid-user directives removed.)
 
 # Enable rewrite engine for React Router
 RewriteEngine On
