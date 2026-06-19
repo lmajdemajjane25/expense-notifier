@@ -421,12 +421,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      clear_import_errors: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      clear_import_errors: { Args: never; Returns: undefined }
       get_import_errors: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           error_message: string
@@ -442,10 +439,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin_or_super_user: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      is_admin_or_super_user: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "normal" | "super_user" | "admin"
